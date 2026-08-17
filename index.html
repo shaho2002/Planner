@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>دفترچه برنامه‌ریزی</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#ECEAE0;
+    --paper-dark:#E2DFD2;
+    --ink:#22282C;
+    --ink-soft:#5B6169;
+    --line:#D2CDBC;
+
+    --home-accent:#7A4B6B;
+    --home-accent-soft:#E9DEE5;
+    --day-accent:#3E6E64;
+    --day-accent-soft:#DCE6E2;
+    --week-accent:#48557E;
+    --week-accent-soft:#DEE1EC;
+    --month-accent:#A8743A;
+    --month-accent-soft:#EEE1CC;
+    --insights-accent:#2E6E8E;
+    --insights-accent-soft:#D9E6EC;
+
+    --warn:#BD8A2E;
+    --warn-soft:#F1E5C8;
+    --danger:#B4483E;
+    --danger-soft:#F3DAD6;
+    --radius:10px;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Vazirmatn',sans-serif;
+    min-height:100vh;
+    background-image: linear-gradient(var(--line) 1px, transparent 1px);
+    background-size: 100% 34px;
+    background-position: 0 120px;
+  }
+
+  .app{ max-width:900px; margin:0 auto; padding:20px 18px 60px; }
+
+  header.masthead{
+    display:flex; align-items:baseline; justify-content:space-between;
+    padding:10px 4px 18px; border-bottom:3px solid var(--ink); margin-bottom:18px;
+  }
+  header.masthead h1{ font-size:22px; font-weight:800; margin:0; }
+  header.masthead .tagline{
+    font-size:12px; color:var(--ink-soft); font-family:'JetBrains Mono',monospace; letter-spacing:.5px;
+  }
+
+  .tabs{ display:flex; gap:6px; margin-bottom:22px; flex-wrap:wrap; }
+  .tab-btn{
+    flex:1; min-width:90px; position:relative; border:none; cursor:pointer;
+    padding:12px 8px 14px; font-family:'Vazirmatn',sans-serif; font-weight:700; font-size:13px;
+    color:var(--ink-soft); background:var(--paper-dark);
+    clip-path: polygon(0 0, 100% 0, 100% 70%, 92% 100%, 8% 100%, 0 70%);
+    transition: transform .15s ease, color .15s ease;
+  }
+  .tab-btn small{ display:block; font-family:'JetBrains Mono',monospace; font-weight:400; font-size:9px; margin-top:3px; letter-spacing:.5px; }
+  .tab-btn.active{ color:#fff; transform: translateY(-3px); }
+  .tab-btn[data-tab="home"].active{ background:var(--home-accent); }
+  .tab-btn[data-tab="day"].active{ background:var(--day-accent); }
+  .tab-btn[data-tab="week"].active{ background:var(--week-accent); }
+  .tab-btn[data-tab="month"].active{ background:var(--month-accent); }
+  .tab-btn[data-tab="insights"].active{ background:var(--insights-accent); }
+
+  .panel{ display:none; }
+  .panel.active{ display:block; animation: fadeIn .25s ease; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);} }
+
+  .card{ background:#fff; border:1px solid var(--line); border-radius:var(--radius); padding:18px; margin-bottom:16px; }
+  .card h2{ margin:0 0 6px; font-size:15px; font-weight:700; display:flex; align-items:center; gap:8px; }
+  .card h2 .dot{ width:9px;height:9px;border-radius:50%; }
+  .card h2 .sub{ font-weight:400; font-size:11.5px; color:var(--ink-soft); margin-right:auto; font-family:'JetBrains Mono',monospace; }
+  .home .dot{ background:var(--home-accent); }
+  .day .dot{ background:var(--day-accent); }
+  .week .dot{ background:var(--week-accent); }
+  .month .dot{ background:var(--month-accent); }
+  .insights .dot{ background:var(--insights-accent); }
+
+  .nav-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
+  .nav-row .nav-title{ font-weight:800; font-size:18px; }
+  .nav-row .nav-sub{ font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--ink-soft); display:block; margin-top:2px; }
+  .nav-btn{ border:1px solid var(--line); background:#fff; width:34px;height:34px; border-radius:8px; cursor:pointer; font-size:16px; display:flex;align-items:center;justify-content:center; color:var(--ink); }
+  .nav-btn:hover{ background:var(--paper-dark); }
+  .nav-btns{ display:flex; gap:6px; }
+  .today-btn{ font-family:'JetBrains Mono',monospace; font-size:11px; border:1px dashed var(--ink-soft); background:none; border-radius:8px; padding:0 10px; cursor:pointer; color:var(--ink-soft); }
+
+  .task-row{ display:flex; align-items:center; gap:12px; padding:10px 4px; border-bottom:1px dashed var(--line); }
+  .task-row:last-child{ border-bottom:none; }
+  .task-row .txt{ flex:1; font-size:14.5px; }
+  .task-row .txt.done{ text-decoration: line-through; color:var(--ink-soft); }
+  .task-row .badges{ display:flex; gap:4px; flex-shrink:0; }
+  .badge{ font-family:'JetBrains Mono',monospace; font-size:9px; padding:2px 6px; border-radius:20px; background:var(--week-accent-soft); color:var(--week-accent); }
+
+  .count-badge{ font-family:'JetBrains Mono',monospace; font-size:10.5px; padding:3px 9px; border-radius:20px; white-space:nowrap; flex-shrink:0; font-weight:600; }
+  .count-normal{ background:var(--month-accent-soft); color:var(--month-accent); }
+  .count-warn{ background:var(--warn-soft); color:var(--warn); }
+  .count-danger{ background:var(--danger-soft); color:var(--danger); }
+  .count-done{ background:var(--day-accent-soft); color:var(--day-accent); }
+
+  .checkbox{ width:22px;height:22px; border-radius:6px; border:2px solid var(--ink-soft); cursor:pointer; flex-shrink:0; display:flex;align-items:center;justify-content:center; background:#fff; transition:.15s; }
+  .checkbox.checked{ background:var(--day-accent); border-color:var(--day-accent); }
+  .checkbox.checked svg{ display:block; }
+  .checkbox svg{ display:none; width:13px;height:13px; stroke:#fff; stroke-width:3; fill:none; }
+
+  .del-btn{ border:none;background:none;cursor:pointer; color:var(--ink-soft); font-size:16px; opacity:.5; padding:2px 4px; }
+  .del-btn:hover{ opacity:1; color:var(--danger); }
+
+  .empty-note{ text-align:center; color:var(--ink-soft); font-size:13px; padding:18px 6px; }
+  .section-label{ font-size:11px; color:var(--ink-soft); font-family:'JetBrains Mono',monospace; margin:14px 0 4px; letter-spacing:.4px; }
+
+  .add-row{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+  .add-row input[type="text"]{ flex:1; min-width:160px; padding:10px 12px; border-radius:8px; border:1px solid var(--line); font-family:'Vazirmatn',sans-serif; font-size:13.5px; background:var(--paper); }
+  .add-row input[type="date"]{ padding:9px 10px; border-radius:8px; border:1px solid var(--line); font-family:'JetBrains Mono',monospace; font-size:12.5px; background:var(--paper); color:var(--ink); }
+  .add-row input:focus{ outline:2px solid var(--day-accent); outline-offset:1px; }
+  .add-btn{ border:none; border-radius:8px; padding:0 16px; font-weight:700; font-size:13px; cursor:pointer; color:#fff; }
+  .day .add-btn{ background:var(--day-accent); }
+  .week .add-btn{ background:var(--week-accent); }
+  .month .add-btn{ background:var(--month-accent); }
+  .home .add-btn{ background:var(--home-accent); }
+
+  .quick-weeks{ display:flex; gap:6px; margin-top:10px; flex-wrap:wrap; }
+  .qw-btn{ font-family:'JetBrains Mono',monospace; font-size:11px; padding:6px 10px; border-radius:20px; border:1px solid var(--line); background:#fff; cursor:pointer; color:var(--ink-soft); }
+  .qw-btn:hover{ background:var(--month-accent-soft); color:var(--month-accent); border-color:var(--month-accent); }
+
+  .progress-wrap{ display:flex; align-items:center; gap:10px; margin-bottom:16px; }
+  .progress-bar{ flex:1; height:8px; border-radius:6px; background:var(--paper-dark); overflow:hidden; }
+  .progress-fill{ height:100%; border-radius:6px; transition:width .3s ease; }
+  .day .progress-fill{ background:var(--day-accent); }
+  .month .progress-fill{ background:var(--month-accent); }
+  .progress-label{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--ink-soft); white-space:nowrap; }
+
+  .day-picker{ display:flex; gap:6px; flex-wrap:wrap; margin:10px 0 4px; }
+  .day-chip{ font-family:'JetBrains Mono',monospace; font-size:11px; padding:6px 10px; border-radius:20px; border:1px solid var(--line); background:#fff; cursor:pointer; color:var(--ink-soft); user-select:none; }
+  .day-chip.on{ background:var(--week-accent); border-color:var(--week-accent); color:#fff; }
+
+  .rec-item{ padding:12px 4px; border-bottom:1px dashed var(--line); }
+  .rec-item:last-child{ border-bottom:none; }
+  .rec-item-top{ display:flex; align-items:center; gap:10px; }
+  .rec-item-top .txt{ flex:1; font-weight:600; font-size:14px; }
+  .rec-item .badges{ margin-top:6px; }
+
+  .hint{ font-size:11.5px; color:var(--ink-soft); margin-top:8px; line-height:1.7; }
+
+  .seg-toggle{ display:flex; gap:6px; }
+  .seg-btn{ flex:1; font-size:13px; font-weight:600; padding:9px 10px; border-radius:8px; border:1px solid var(--line); background:#fff; cursor:pointer; color:var(--ink-soft); }
+  .seg-btn.on{ background:var(--insights-accent); border-color:var(--insights-accent); color:#fff; }
+
+  .heat-legend{ display:flex; gap:14px; flex-wrap:wrap; margin-top:14px; font-size:11px; color:var(--ink-soft); }
+  .heat-legend span{ display:inline-flex; align-items:center; gap:5px; }
+  .heat-legend i{ width:10px; height:10px; border-radius:3px; display:inline-block; }
+
+  .chart-wrap{ display:flex; align-items:flex-end; gap:6px; height:160px; direction:ltr; margin-top:10px; padding-top:18px; }
+  .chart-bar-col{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; min-width:0; cursor:pointer; border-radius:6px; padding-top:4px; }
+  .chart-bar-col:hover{ background:var(--insights-accent-soft); }
+  .chart-bar-col.is-today .chart-bar-label{ color:var(--insights-accent); font-weight:700; }
+  .chart-bar-col.selected{ background:var(--insights-accent-soft); }
+  .chart-bar-value{ font-size:9.5px; color:var(--ink-soft); font-family:'JetBrains Mono',monospace; margin-bottom:3px; white-space:nowrap; }
+  .chart-bar{ width:100%; max-width:30px; border-radius:5px 5px 0 0; background:var(--paper-dark); transition:height .3s ease; }
+  .chart-bar.c0{ background:var(--danger); }
+  .chart-bar.c1{ background:var(--warn); }
+  .chart-bar.c2{ background:#8FB79A; }
+  .chart-bar.c3{ background:var(--day-accent); }
+  .chart-bar.empty{ background:var(--paper-dark); opacity:.35; }
+  .chart-bar-label{ font-size:9px; color:var(--ink-soft); margin-top:6px; font-family:'JetBrains Mono',monospace; text-align:center; line-height:1.3; }
+
+  .week-mini-row{ display:flex; align-items:center; gap:10px; padding:9px 4px; border-bottom:1px dashed var(--line); cursor:pointer; }
+  .week-mini-row:last-child{ border-bottom:none; }
+  .week-mini-row:hover{ background:var(--insights-accent-soft); border-radius:6px; }
+  .week-mini-row .wm-label{ flex:1; font-size:13px; font-weight:600; }
+  .week-mini-row .wm-bar-track{ flex:2; height:8px; border-radius:6px; background:var(--paper-dark); overflow:hidden; }
+  .week-mini-row .wm-bar-fill{ height:100%; border-radius:6px; }
+  .week-mini-row .wm-pct{ font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--ink-soft); width:38px; text-align:left; }
+
+  details.done-group{ margin-top:6px; }
+  details.done-group summary{ cursor:pointer; font-size:12px; color:var(--ink-soft); font-family:'JetBrains Mono',monospace; padding:6px 2px; }
+
+  footer.status{ text-align:center; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--ink-soft); margin-top:26px; opacity:.7; }
+
+  @media (max-width:520px){
+    .tab-btn{ font-size:11px; padding:10px 4px 12px; }
+    .nav-row .nav-title{ font-size:16px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="masthead">
+    <div><h1>دفترچه برنامه‌ریزی</h1></div>
+    <span class="tagline" id="clockLabel">—</span>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="home">نمای کلی<small>OVERVIEW</small></button>
+    <button class="tab-btn" data-tab="day">روزانه<small>DAILY</small></button>
+    <button class="tab-btn" data-tab="week">برنامه هفتگی<small>WEEKLY</small></button>
+    <button class="tab-btn" data-tab="month">اهداف ماهانه<small>TARGETS</small></button>
+    <button class="tab-btn" data-tab="insights">آمار<small>INSIGHTS</small></button>
+  </div>
+
+  <!-- ================= HOME / OVERVIEW ================= -->
+  <section class="panel active home" id="panel-home">
+    <div class="card home">
+      <h2><span class="dot"></span>امروز <span class="sub" id="homeDateLabel">—</span></h2>
+      <p class="hint">همه‌چیزی که امروز باید بهش برسی: تارگت‌های ماهانه‌ی فعال، برنامه‌ی تکرارشونده‌ی امروز، و کارهای اضافه.</p>
+    </div>
+
+    <div class="card home">
+      <h2><span class="dot"></span>تارگت‌های ماهانه‌ی فعال</h2>
+      <div id="homeTargets"></div>
+    </div>
+
+    <div class="card home">
+      <h2><span class="dot"></span>کارهای تکرارشونده‌ی امروز</h2>
+      <div id="homeRecurring"></div>
+    </div>
+
+    <div class="card home">
+      <h2><span class="dot"></span>کارهای اضافه‌ی امروز</h2>
+      <div id="homeExtras"></div>
+      <div class="add-row">
+        <input type="text" id="homeExtraInput" placeholder="کار یا نکته‌ای بنویس…" maxlength="200">
+        <button class="add-btn" id="homeExtraAdd">افزودن</button>
+      </div>
+    </div>
+
+    <div class="card home">
+      <h2><span class="dot"></span>پشتیبان‌گیری از اطلاعات</h2>
+      <p class="hint">همه‌ی اطلاعاتت (کارهای تکرارشونده، اهداف ماهانه، تاریخچه‌ی روزانه) رو توی یه فایل ذخیره کن؛ برای وقتی می‌خوای به مرورگر یا گوشی دیگه‌ای منتقلش کنی، یا قبل از پاک کردن حافظه‌ی مرورگر خیالت راحت باشه.</p>
+      <div class="add-row">
+        <button class="add-btn" id="backupExportBtn" type="button">دانلود فایل پشتیبان</button>
+        <label class="add-btn" id="backupImportLabel" style="cursor:pointer;display:inline-flex;align-items:center;justify-content:center;">
+          بازیابی از فایل
+          <input type="file" id="backupImportInput" accept="application/json" style="display:none;">
+        </label>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= DAY PANEL ================= -->
+  <section class="panel day" id="panel-day">
+    <div class="card">
+      <div class="nav-row">
+        <div>
+          <span class="nav-title" id="dayTitle">—</span>
+          <span class="nav-sub" id="daySub">—</span>
+        </div>
+        <div class="nav-btns">
+          <button class="nav-btn" id="dayPrev">›</button>
+          <button class="today-btn" id="dayToday">امروز</button>
+          <button class="nav-btn" id="dayNext">‹</button>
+        </div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-bar"><div class="progress-fill" id="dayProgressFill" style="width:0%"></div></div>
+        <span class="progress-label" id="dayProgressLabel">0/0</span>
+      </div>
+    </div>
+
+    <div class="card day">
+      <h2><span class="dot"></span>برنامه تکرارشونده این روز</h2>
+      <div id="dayRecurringList"></div>
+    </div>
+
+    <div class="card day">
+      <h2><span class="dot"></span>کارها و نکته‌های اضافه این روز</h2>
+      <div id="dayExtraList"></div>
+      <div class="add-row">
+        <input type="text" id="dayExtraInput" placeholder="کار یا نکته‌ای بنویس که خارج از برنامه بود…" maxlength="200">
+        <button class="add-btn" id="dayExtraAdd">افزودن</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= WEEK PANEL ================= -->
+  <section class="panel week" id="panel-week">
+    <div class="card week">
+      <h2><span class="dot"></span>افزودن برنامه تکرارشونده</h2>
+      <div class="add-row">
+        <input type="text" id="weekTitleInput" placeholder="عنوان کار (مثلاً: ورزش صبحگاهی)" maxlength="120">
+        <button class="add-btn" id="weekAdd">افزودن</button>
+      </div>
+      <div class="day-picker" id="weekDayPicker"></div>
+      <p class="hint">روزهایی که این کار باید تکرار بشه رو انتخاب کن. بعداً می‌تونی از تب «روزانه» یا «نمای کلی» انجام‌شدنش رو تیک بزنی.</p>
+    </div>
+
+    <div class="card week">
+      <h2><span class="dot"></span>لیست برنامه‌های هفتگی</h2>
+      <div id="weekList"></div>
+    </div>
+  </section>
+
+  <!-- ================= MONTH / TARGETS PANEL ================= -->
+  <section class="panel month" id="panel-month">
+    <div class="card month">
+      <h2><span class="dot"></span>افزودن تارگت جدید</h2>
+      <div class="add-row">
+        <input type="text" id="targetTextInput" placeholder="عنوان هدف (مثلاً: تموم کردن دوره فلان)" maxlength="200">
+        <input type="date" id="targetDateInput">
+        <button class="add-btn" id="targetAdd">افزودن</button>
+      </div>
+      <div class="quick-weeks">
+        <button class="qw-btn" data-weeks="1">۱ هفته دیگه</button>
+        <button class="qw-btn" data-weeks="2">۲ هفته دیگه</button>
+        <button class="qw-btn" data-weeks="3">۳ هفته دیگه</button>
+        <button class="qw-btn" data-weeks="4">۴ هفته دیگه</button>
+        <button class="qw-btn" data-weeks="6">۶ هفته دیگه</button>
+      </div>
+      <p class="hint" id="targetDateHint" style="min-height:16px;"></p>
+      <p class="hint">تاریخ ددلاین رو یا با دکمه‌های سریع بالا پر کن یا خودت دستی از تقویم انتخاب کن — هر هدف مهلت مخصوص به خودش رو داره. (تقویم خود مرورگر میلادیه، ولی همه‌جای دیگه‌ی برنامه تاریخ‌ها شمسی نشون داده می‌شن)</p>
+    </div>
+
+    <div class="card month">
+      <h2><span class="dot"></span>تارگت‌های در حال انجام <span class="sub" id="targetProgressLabel">0/0</span></h2>
+      <div class="progress-wrap">
+        <div class="progress-bar"><div class="progress-fill" id="targetProgressFill" style="width:0%"></div></div>
+      </div>
+      <div id="targetActiveList"></div>
+      <details class="done-group">
+        <summary id="doneSummary">تارگت‌های انجام‌شده</summary>
+        <div id="targetDoneList"></div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ================= INSIGHTS PANEL ================= -->
+  <section class="panel insights" id="panel-insights">
+    <div class="card insights">
+      <h2><span class="dot"></span>عملکرد کارهای تکرارشونده</h2>
+      <p class="hint">میانگین انجام کارهای تکرارشونده رو ببین — روزانه یا هفتگی — و با یه کلیک روی هر ستون، جزئیاتش رو باز کن.</p>
+      <div class="seg-toggle" style="margin-top:12px;">
+        <button class="seg-btn on" data-mode="daily">روزانه</button>
+        <button class="seg-btn" data-mode="weekly">هفتگی</button>
+      </div>
+    </div>
+
+    <div class="card insights">
+      <h2><span class="dot"></span><span id="insightsChartTitle">—</span></h2>
+      <div class="chart-wrap" id="insightsChartWrap"></div>
+      <div class="heat-legend">
+        <span><i style="background:var(--day-accent)"></i>عالی (۸۰٪+)</span>
+        <span><i style="background:#8FB79A"></i>خوب</span>
+        <span><i style="background:var(--warn)"></i>متوسط</span>
+        <span><i style="background:var(--danger)"></i>ضعیف</span>
+        <span><i style="background:var(--paper-dark);opacity:.5"></i>برنامه‌ای نبوده</span>
+      </div>
+    </div>
+
+    <div class="card insights" id="insightsDetailCard" style="display:none;">
+      <h2><span class="dot"></span><span id="insightsDetailTitle">جزئیات</span></h2>
+      <div id="insightsDetailBody"></div>
+    </div>
+  </section>
+
+  <footer class="status" id="statusLine">در حال بارگذاری…</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  const WEEKDAYS = [
+    {idx:6, name:"شنبه"}, {idx:0, name:"یکشنبه"}, {idx:1, name:"دوشنبه"},
+    {idx:2, name:"سه‌شنبه"}, {idx:3, name:"چهارشنبه"}, {idx:4, name:"پنج‌شنبه"}, {idx:5, name:"جمعه"},
+  ];
+  const WD_SHORT = {6:"ش",0:"ی",1:"د",2:"س",3:"چ",4:"پ",5:"ج"};
+  const MONTH_NAMES = ["فروردین","اردیبهشت","خرداد","تیر","مرداد","شهریور","مهر","آبان","آذر","دی","بهمن","اسفند"];
+  const checkSvg = '<svg viewBox="0 0 24 24"><polyline points="4,13 9,18 20,6"/></svg>';
+
+  function toPersianDigits(input){
+    const map = {"0":"۰","1":"۱","2":"۲","3":"۳","4":"۴","5":"۵","6":"۶","7":"۷","8":"۸","9":"۹"};
+    return String(input).replace(/[0-9]/g, ch=>map[ch]);
+  }
+  // standard Gregorian -> Jalali (Shamsi) conversion
+  function gregorianToJalali(gy, gm, gd){
+    const div = (a,b)=>Math.floor(a/b);
+    const g_d_m = [0,31,59,90,120,151,181,212,243,273,304,334];
+    let jy;
+    if(gy<=1600){ jy=0; gy-=621; } else { jy=979; gy-=1600; }
+    const gy2 = (gm>2) ? (gy+1) : gy;
+    let days = (365*gy) + div(gy2+3,4) - div(gy2+99,100) + div(gy2+399,400) - 80 + gd + g_d_m[gm-1];
+    jy += 33*div(days,12053); days %= 12053;
+    jy += 4*div(days,1461); days %= 1461;
+    if(days > 365){ jy += div(days-1,365); days = (days-1)%365; }
+    let jm, jd;
+    if(days < 186){ jm = 1 + div(days,31); jd = 1 + (days%31); }
+    else { jm = 7 + div(days-186,30); jd = 1 + ((days-186)%30); }
+    return {jy, jm, jd};
+  }
+  function toJalali(d){ return gregorianToJalali(d.getFullYear(), d.getMonth()+1, d.getDate()); }
+
+  function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  function pad(n){ return String(n).padStart(2,"0"); }
+  function dateKey(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+  function midnight(d){ const c = new Date(d); c.setHours(0,0,0,0); return c; }
+  function fmtDayTitle(d){ return WEEKDAYS.find(w=>w.idx===d.getDay()).name; }
+  function fmtDaySub(d){ const j = toJalali(d); return `${toPersianDigits(j.jd)} ${MONTH_NAMES[j.jm-1]} ${toPersianDigits(j.jy)}`; }
+  function fmtDeadline(str){ const d = new Date(str+"T00:00:00"); const j = toJalali(d); return `${toPersianDigits(j.jd)} ${MONTH_NAMES[j.jm-1]} ${toPersianDigits(j.jy)}`; }
+  function jalaliDayNum(d){ return toPersianDigits(toJalali(d).jd); }
+  function escapeHtml(str){ const d = document.createElement("div"); d.textContent = str; return d.innerHTML; }
+  function daysLeft(deadlineStr){
+    const dl = midnight(new Date(deadlineStr+"T00:00:00"));
+    const today = midnight(new Date());
+    return Math.round((dl - today) / 86400000);
+  }
+
+  // ---------------- storage helpers (uses the browser's own localStorage,
+  // so data is saved on THIS device/browser and survives refresh, even when
+  // this file is opened directly and not inside claude.ai) ----------------
+  const STORAGE_PREFIX = "planner:";
+  async function storeGet(key){
+    try{
+      const raw = localStorage.getItem(STORAGE_PREFIX + key);
+      return raw ? JSON.parse(raw) : null;
+    }catch(e){ return null; }
+  }
+  async function storeSet(key, value){
+    try{
+      localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(value));
+      setStatus("ذخیره شد ✓");
+    }catch(e){ setStatus("خطا در ذخیره‌سازی (شاید حافظه مرورگر پر یا غیرفعاله)"); }
+  }
+  function setStatus(msg){
+    const el = document.getElementById("statusLine");
+    el.textContent = msg;
+    clearTimeout(setStatus._t);
+    setStatus._t = setTimeout(()=>{ el.textContent = "اطلاعات به‌صورت خودکار روی این دستگاه ذخیره می‌شود"; }, 1800);
+  }
+
+  // the weekly insights chart looks back 70 days at most; keep a little buffer
+  // beyond that so nothing gets deleted while still on screen, then purge the rest
+  const DAILY_RETENTION_DAYS = 90;
+  function cleanupOldDailyRecords(){
+    try{
+      const cutoff = midnight(new Date());
+      cutoff.setDate(cutoff.getDate() - DAILY_RETENTION_DAYS);
+      const cutoffKey = dateKey(cutoff);
+      const prefix = STORAGE_PREFIX + "daily:";
+      const toRemove = [];
+      for(let i=0;i<localStorage.length;i++){
+        const k = localStorage.key(i);
+        if(k && k.indexOf(prefix)===0){
+          const dStr = k.slice(prefix.length);
+          if(dStr < cutoffKey) toRemove.push(k);
+        }
+      }
+      toRemove.forEach(k=>localStorage.removeItem(k));
+    }catch(e){ /* ignore — cleanup is best-effort */ }
+  }
+
+  // ---------------- state ----------------
+  let recurringTasks = [];      // [{id,title,days:[0-6]}]
+  let targets = [];             // [{id,text,deadline,createdAt,done}]
+  let dayDate = new Date();     // navigable date for the "day" tab
+  let dayRecord = {tasks:{}, extras:[]};
+
+  function todayKey(){ return dateKey(new Date()); }
+
+  // ================= INIT =================
+  async function init(){
+    cleanupOldDailyRecords();
+    document.getElementById("clockLabel").textContent = fmtDaySub(new Date());
+    document.getElementById("homeDateLabel").textContent = `${fmtDayTitle(new Date())} — ${fmtDaySub(new Date())}`;
+    document.getElementById("targetDateInput").min = todayKey();
+
+    recurringTasks = (await storeGet("recurring-tasks")) || [];
+    targets = (await storeGet("targets")) || [];
+
+    await loadDay();
+    renderWeekList();
+    renderTargets();
+    renderHome();
+    await renderInsights();
+    setStatus("اطلاعات به‌صورت خودکار روی این دستگاه ذخیره می‌شود");
+  }
+
+  // ================= TABS =================
+  document.querySelectorAll(".tab-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+      document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
+      btn.classList.add("active");
+      document.getElementById("panel-"+btn.dataset.tab).classList.add("active");
+      if(btn.dataset.tab==="home") renderHome();
+      if(btn.dataset.tab==="insights") renderInsights();
+    });
+  });
+
+  // ================= DAILY RECORD (shared logic for day + home) =================
+  async function loadDay(){
+    const key = "daily:" + dateKey(dayDate);
+    dayRecord = (await storeGet(key)) || {tasks:{}, extras:[]};
+    document.getElementById("dayTitle").textContent = fmtDayTitle(dayDate);
+    document.getElementById("daySub").textContent = fmtDaySub(dayDate);
+    renderDay();
+  }
+
+  async function saveDay(){
+    await storeSet("daily:" + dateKey(dayDate), dayRecord);
+    renderDay();
+    if(dateKey(dayDate) === todayKey()) renderHome();
+  }
+
+  // used by the Home tab: if home is showing "today" and the Day tab also
+  // happens to be on "today", they operate on the very same dayRecord object.
+  // if Day tab is on a different date, Home loads/saves its own copy for "today".
+  let homeTodayRecord = null;
+  async function getHomeRecord(){
+    if(dateKey(dayDate) === todayKey()) return dayRecord;
+    if(!homeTodayRecord) homeTodayRecord = (await storeGet("daily:" + todayKey())) || {tasks:{}, extras:[]};
+    return homeTodayRecord;
+  }
+  async function saveHomeRecord(rec){
+    await storeSet("daily:" + todayKey(), rec);
+    if(dateKey(dayDate) === todayKey()){ dayRecord = rec; renderDay(); }
+    else { homeTodayRecord = rec; }
+    renderHome();
+  }
+
+  function todaysRecurringFor(d){
+    return recurringTasks.filter(t => t.days.includes(d.getDay()));
+  }
+
+  // ---------- render: Day tab ----------
+  function renderDay(){
+    const list = todaysRecurringFor(dayDate);
+    const wrap = document.getElementById("dayRecurringList");
+    wrap.innerHTML = "";
+    if(list.length===0){
+      wrap.innerHTML = `<div class="empty-note">برای این روز کار تکرارشونده‌ای تعریف نشده. از تب «برنامه هفتگی» اضافه کن.</div>`;
+    } else {
+      list.forEach(t=>{
+        const done = !!dayRecord.tasks[t.id];
+        const row = document.createElement("div");
+        row.className = "task-row";
+        row.innerHTML = `<div class="checkbox ${done?"checked":""}" data-id="${t.id}">${checkSvg}</div><div class="txt ${done?"done":""}">${escapeHtml(t.title)}</div>`;
+        row.querySelector(".checkbox").addEventListener("click", async ()=>{
+          dayRecord.tasks[t.id] = !dayRecord.tasks[t.id];
+          await saveDay();
+        });
+        wrap.appendChild(row);
+      });
+    }
+
+    const exWrap = document.getElementById("dayExtraList");
+    exWrap.innerHTML = "";
+    if(dayRecord.extras.length===0){
+      exWrap.innerHTML = `<div class="empty-note">هنوز کار اضافه‌ای برای این روز ثبت نشده.</div>`;
+    } else {
+      dayRecord.extras.forEach(ex=>{
+        const row = document.createElement("div");
+        row.className = "task-row";
+        row.innerHTML = `<div class="checkbox ${ex.done?"checked":""}" data-id="${ex.id}">${checkSvg}</div><div class="txt ${ex.done?"done":""}">${escapeHtml(ex.text)}</div><button class="del-btn" data-id="${ex.id}">✕</button>`;
+        row.querySelector(".checkbox").addEventListener("click", async ()=>{ ex.done = !ex.done; await saveDay(); });
+        row.querySelector(".del-btn").addEventListener("click", async ()=>{ dayRecord.extras = dayRecord.extras.filter(e=>e.id!==ex.id); await saveDay(); });
+        exWrap.appendChild(row);
+      });
+    }
+
+    const total = list.length + dayRecord.extras.length;
+    const doneCount = list.filter(t=>dayRecord.tasks[t.id]).length + dayRecord.extras.filter(e=>e.done).length;
+    const pct = total===0 ? 0 : Math.round((doneCount/total)*100);
+    document.getElementById("dayProgressFill").style.width = pct+"%";
+    document.getElementById("dayProgressLabel").textContent = `${doneCount}/${total}`;
+  }
+
+  document.getElementById("dayPrev").addEventListener("click", async ()=>{ dayDate.setDate(dayDate.getDate()+1); await loadDay(); });
+  document.getElementById("dayNext").addEventListener("click", async ()=>{ dayDate.setDate(dayDate.getDate()-1); await loadDay(); });
+  document.getElementById("dayToday").addEventListener("click", async ()=>{ dayDate = new Date(); await loadDay(); });
+
+  document.getElementById("dayExtraAdd").addEventListener("click", addExtra);
+  document.getElementById("dayExtraInput").addEventListener("keydown", e=>{ if(e.key==="Enter") addExtra(); });
+  async function addExtra(){
+    const inp = document.getElementById("dayExtraInput");
+    const val = inp.value.trim();
+    if(!val) return;
+    dayRecord.extras.push({id:uid(), text:val, done:false});
+    inp.value="";
+    await saveDay();
+  }
+
+  // ================= WEEK PANEL =================
+  let pickedDays = new Set();
+  const pickerWrap = document.getElementById("weekDayPicker");
+  WEEKDAYS.forEach(w=>{
+    const chip = document.createElement("div");
+    chip.className = "day-chip";
+    chip.textContent = w.name;
+    chip.dataset.idx = w.idx;
+    chip.addEventListener("click", ()=>{
+      if(pickedDays.has(w.idx)){ pickedDays.delete(w.idx); chip.classList.remove("on"); }
+      else { pickedDays.add(w.idx); chip.classList.add("on"); }
+    });
+    pickerWrap.appendChild(chip);
+  });
+
+  document.getElementById("weekAdd").addEventListener("click", addRecurring);
+  document.getElementById("weekTitleInput").addEventListener("keydown", e=>{ if(e.key==="Enter") addRecurring(); });
+
+  async function addRecurring(){
+    const inp = document.getElementById("weekTitleInput");
+    const title = inp.value.trim();
+    if(!title || pickedDays.size===0){
+      setStatus(!title ? "عنوان کار را بنویس" : "حداقل یک روز را انتخاب کن");
+      return;
+    }
+    recurringTasks.push({id:uid(), title, days:Array.from(pickedDays)});
+    await storeSet("recurring-tasks", recurringTasks);
+    inp.value = "";
+    pickedDays.clear();
+    pickerWrap.querySelectorAll(".day-chip").forEach(c=>c.classList.remove("on"));
+    renderWeekList();
+    renderDay();
+    renderHome();
+  }
+
+  function renderWeekList(){
+    const wrap = document.getElementById("weekList");
+    wrap.innerHTML = "";
+    if(recurringTasks.length===0){
+      wrap.innerHTML = `<div class="empty-note">هنوز برنامه تکرارشونده‌ای اضافه نکرده‌ای.</div>`;
+      return;
+    }
+    recurringTasks.forEach(t=>{
+      const item = document.createElement("div");
+      item.className = "rec-item";
+      const badges = t.days.slice()
+        .sort((a,b)=> WEEKDAYS.findIndex(w=>w.idx===a) - WEEKDAYS.findIndex(w=>w.idx===b))
+        .map(d=>`<span class="badge">${WD_SHORT[d]}</span>`).join("");
+      item.innerHTML = `<div class="rec-item-top"><div class="txt">${escapeHtml(t.title)}</div><button class="del-btn" data-id="${t.id}">✕</button></div><div class="badges">${badges}</div>`;
+      item.querySelector(".del-btn").addEventListener("click", async ()=>{
+        recurringTasks = recurringTasks.filter(x=>x.id!==t.id);
+        await storeSet("recurring-tasks", recurringTasks);
+        renderWeekList(); renderDay(); renderHome();
+      });
+      wrap.appendChild(item);
+    });
+  }
+
+  // ================= TARGETS (monthly goals with deadlines) =================
+  function updateTargetDateHint(){
+    const v = document.getElementById("targetDateInput").value;
+    document.getElementById("targetDateHint").textContent = v ? `معادل شمسی: ${fmtDeadline(v)}` : "";
+  }
+  document.getElementById("targetDateInput").addEventListener("input", updateTargetDateHint);
+
+  document.querySelectorAll(".qw-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const weeks = parseInt(btn.dataset.weeks, 10);
+      const d = new Date();
+      d.setDate(d.getDate() + weeks*7);
+      document.getElementById("targetDateInput").value = dateKey(d);
+      updateTargetDateHint();
+    });
+  });
+
+  document.getElementById("targetAdd").addEventListener("click", addTarget);
+  document.getElementById("targetTextInput").addEventListener("keydown", e=>{ if(e.key==="Enter") addTarget(); });
+
+  async function addTarget(){
+    const textInp = document.getElementById("targetTextInput");
+    const dateInp = document.getElementById("targetDateInput");
+    const text = textInp.value.trim();
+    const deadline = dateInp.value;
+    if(!text || !deadline){
+      setStatus(!text ? "عنوان هدف را بنویس" : "یک تاریخ ددلاین انتخاب کن");
+      return;
+    }
+    targets.push({id:uid(), text, deadline, createdAt:todayKey(), done:false});
+    await storeSet("targets", targets);
+    textInp.value = ""; dateInp.value = "";
+    updateTargetDateHint();
+    renderTargets();
+    renderHome();
+  }
+
+  async function toggleTarget(id){
+    const t = targets.find(x=>x.id===id);
+    if(!t) return;
+    t.done = !t.done;
+    await storeSet("targets", targets);
+    renderTargets();
+    renderHome();
+  }
+  async function deleteTarget(id){
+    targets = targets.filter(x=>x.id!==id);
+    await storeSet("targets", targets);
+    renderTargets();
+    renderHome();
+  }
+
+  function countBadge(t){
+    if(t.done) return `<span class="count-badge count-done">انجام شد ✓</span>`;
+    const dl = daysLeft(t.deadline);
+    if(dl < 0) return `<span class="count-badge count-danger">${Math.abs(dl)} روز گذشته</span>`;
+    if(dl === 0) return `<span class="count-badge count-danger">امروز آخرین مهلته</span>`;
+    if(dl <= 3) return `<span class="count-badge count-danger">${dl} روز مونده</span>`;
+    if(dl <= 7) return `<span class="count-badge count-warn">${dl} روز مونده</span>`;
+    return `<span class="count-badge count-normal">${dl} روز مونده</span>`;
+  }
+
+  function targetRow(t){
+    const row = document.createElement("div");
+    row.className = "task-row";
+    row.innerHTML = `
+      <div class="checkbox ${t.done?"checked":""}" data-id="${t.id}">${checkSvg}</div>
+      <div class="txt ${t.done?"done":""}">${escapeHtml(t.text)}<br><span class="badge" style="margin-top:4px;display:inline-block;">مهلت: ${fmtDeadline(t.deadline)}</span></div>
+      ${countBadge(t)}
+      <button class="del-btn" data-id="${t.id}">✕</button>
+    `;
+    row.querySelector(".checkbox").addEventListener("click", ()=>toggleTarget(t.id));
+    row.querySelector(".del-btn").addEventListener("click", ()=>deleteTarget(t.id));
+    return row;
+  }
+
+  function renderTargets(){
+    const active = targets.filter(t=>!t.done).sort((a,b)=> new Date(a.deadline) - new Date(b.deadline));
+    const done = targets.filter(t=>t.done).sort((a,b)=> new Date(b.deadline) - new Date(a.deadline));
+
+    const activeWrap = document.getElementById("targetActiveList");
+    activeWrap.innerHTML = "";
+    if(active.length===0){
+      activeWrap.innerHTML = `<div class="empty-note">هدفی در حال انجام نیست. یکی از بالا اضافه کن.</div>`;
+    } else {
+      active.forEach(t=>activeWrap.appendChild(targetRow(t)));
+    }
+
+    const doneWrap = document.getElementById("targetDoneList");
+    doneWrap.innerHTML = "";
+    done.forEach(t=>doneWrap.appendChild(targetRow(t)));
+    document.getElementById("doneSummary").textContent = `تارگت‌های انجام‌شده (${done.length})`;
+
+    const total = targets.length;
+    const doneCount = done.length;
+    const pct = total===0 ? 0 : Math.round((doneCount/total)*100);
+    document.getElementById("targetProgressFill").style.width = pct+"%";
+    document.getElementById("targetProgressLabel").textContent = `${doneCount}/${total}`;
+  }
+
+  // ================= HOME / OVERVIEW =================
+  async function renderHome(){
+    // targets due section
+    const active = targets.filter(t=>!t.done).sort((a,b)=> new Date(a.deadline) - new Date(b.deadline));
+    const homeTargetsWrap = document.getElementById("homeTargets");
+    homeTargetsWrap.innerHTML = "";
+    if(active.length===0){
+      homeTargetsWrap.innerHTML = `<div class="empty-note">فعلاً تارگت فعالی نداری. از تب «اهداف ماهانه» یکی اضافه کن.</div>`;
+    } else {
+      active.forEach(t=>homeTargetsWrap.appendChild(targetRow(t)));
+    }
+
+    // today's recurring + extras
+    const rec = await getHomeRecord();
+    const todayObj = new Date();
+    const list = todaysRecurringFor(todayObj);
+
+    const recWrap = document.getElementById("homeRecurring");
+    recWrap.innerHTML = "";
+    if(list.length===0){
+      recWrap.innerHTML = `<div class="empty-note">برای امروز کار تکرارشونده‌ای تعریف نشده.</div>`;
+    } else {
+      list.forEach(t=>{
+        const done = !!rec.tasks[t.id];
+        const row = document.createElement("div");
+        row.className = "task-row";
+        row.innerHTML = `<div class="checkbox ${done?"checked":""}" data-id="${t.id}">${checkSvg}</div><div class="txt ${done?"done":""}">${escapeHtml(t.title)}</div>`;
+        row.querySelector(".checkbox").addEventListener("click", async ()=>{
+          const r = await getHomeRecord();
+          r.tasks[t.id] = !r.tasks[t.id];
+          await saveHomeRecord(r);
+        });
+        recWrap.appendChild(row);
+      });
+    }
+
+    const exWrap = document.getElementById("homeExtras");
+    exWrap.innerHTML = "";
+    if(rec.extras.length===0){
+      exWrap.innerHTML = `<div class="empty-note">هنوز کار اضافه‌ای برای امروز ثبت نشده.</div>`;
+    } else {
+      rec.extras.forEach(ex=>{
+        const row = document.createElement("div");
+        row.className = "task-row";
+        row.innerHTML = `<div class="checkbox ${ex.done?"checked":""}" data-id="${ex.id}">${checkSvg}</div><div class="txt ${ex.done?"done":""}">${escapeHtml(ex.text)}</div><button class="del-btn" data-id="${ex.id}">✕</button>`;
+        row.querySelector(".checkbox").addEventListener("click", async ()=>{
+          const r = await getHomeRecord();
+          const target = r.extras.find(e=>e.id===ex.id);
+          if(target) target.done = !target.done;
+          await saveHomeRecord(r);
+        });
+        row.querySelector(".del-btn").addEventListener("click", async ()=>{
+          const r = await getHomeRecord();
+          r.extras = r.extras.filter(e=>e.id!==ex.id);
+          await saveHomeRecord(r);
+        });
+        exWrap.appendChild(row);
+      });
+    }
+  }
+
+  document.getElementById("homeExtraAdd").addEventListener("click", addHomeExtra);
+  document.getElementById("homeExtraInput").addEventListener("keydown", e=>{ if(e.key==="Enter") addHomeExtra(); });
+  async function addHomeExtra(){
+    const inp = document.getElementById("homeExtraInput");
+    const val = inp.value.trim();
+    if(!val) return;
+    const r = await getHomeRecord();
+    r.extras.push({id:uid(), text:val, done:false});
+    inp.value = "";
+    await saveHomeRecord(r);
+  }
+
+  // ================= BACKUP / RESTORE =================
+  function exportBackup(){
+    const data = {};
+    for(let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i);
+      if(k && k.indexOf(STORAGE_PREFIX)===0) data[k] = localStorage.getItem(k);
+    }
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `planner-backup-${todayKey()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    setStatus("فایل پشتیبان دانلود شد ✓");
+  }
+  document.getElementById("backupExportBtn").addEventListener("click", exportBackup);
+
+  document.getElementById("backupImportInput").addEventListener("change", (e)=>{
+    const file = e.target.files[0];
+    e.target.value = ""; // allow re-selecting the same file later
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = async ()=>{
+      let data;
+      try{ data = JSON.parse(reader.result); }
+      catch(err){ setStatus("فایل پشتیبان معتبر نیست"); return; }
+
+      const keys = Object.keys(data);
+      if(keys.length===0 || !keys.every(k=>k.indexOf(STORAGE_PREFIX)===0)){
+        setStatus("این فایل، فایل پشتیبان این برنامه نیست");
+        return;
+      }
+      if(!confirm("بازیابی این فایل، اطلاعات فعلی روی این مرورگر رو با اطلاعات فایل جایگزین می‌کنه. ادامه بدم؟")) return;
+
+      keys.forEach(k=>{
+        try{ localStorage.setItem(k, data[k]); }catch(err){ /* ignore individual failures */ }
+      });
+      setStatus("بازیابی شد ✓ در حال بارگذاری مجدد…");
+      setTimeout(()=>location.reload(), 700);
+    };
+    reader.readAsText(file);
+  });
+
+
+  // ================= shared daily-record helpers (used by Insights detail) =================
+  async function getRecordForDate(dateStr){
+    return (await storeGet("daily:" + dateStr)) || {tasks:{}, extras:[]};
+  }
+  async function saveRecordForDate(dateStr, rec){
+    await storeSet("daily:" + dateStr, rec);
+    // keep the Day tab and Home tab in sync if they reference this same date
+    if(dateStr === dateKey(dayDate)){ dayRecord = rec; renderDay(); }
+    if(dateStr === todayKey()){ homeTodayRecord = rec; renderHome(); }
+  }
+
+  function lastNDatesInclusiveToday(n){
+    const arr = [];
+    const today = midnight(new Date());
+    for(let i=n-1;i>=0;i--){
+      const d = new Date(today);
+      d.setDate(d.getDate()-i);
+      arr.push(d);
+    }
+    return arr; // ascending, oldest first, today last
+  }
+
+  function pctClass(pct){ return pct>=80 ? "c3" : pct>=50 ? "c2" : pct>0 ? "c1" : "c0"; }
+
+  // ================= INSIGHTS (daily / weekly toggle) =================
+  let insightsMode = "daily";
+  let insightsSelected = null; // dStr for daily mode, week index for weekly mode
+
+  document.querySelectorAll(".seg-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      if(btn.dataset.mode === insightsMode) return;
+      insightsMode = btn.dataset.mode;
+      insightsSelected = null;
+      document.querySelectorAll(".seg-btn").forEach(b=>b.classList.remove("on"));
+      btn.classList.add("on");
+      document.getElementById("insightsDetailCard").style.display = "none";
+      renderInsights();
+    });
+  });
+
+  async function dayAggregate(d){
+    const applicable = recurringTasks.filter(t=>t.days.includes(d.getDay()));
+    if(applicable.length===0) return {applicable:0, done:0, pct:null};
+    const rec = await getRecordForDate(dateKey(d));
+    const done = applicable.filter(t=>rec.tasks && rec.tasks[t.id]).length;
+    return {applicable:applicable.length, done, pct:Math.round((done/applicable.length)*100)};
+  }
+
+  async function renderInsights(){
+    if(insightsMode === "daily") await renderInsightsDaily();
+    else await renderInsightsWeekly();
+  }
+
+  async function renderInsightsDaily(){
+    document.getElementById("insightsChartTitle").textContent = "۱۴ روز اخیر";
+    const dates = lastNDatesInclusiveToday(14);
+    const wrap = document.getElementById("insightsChartWrap");
+    wrap.innerHTML = "";
+
+    for(const d of dates){
+      const dStr = dateKey(d);
+      const agg = await dayAggregate(d);
+      const col = document.createElement("div");
+      col.className = "chart-bar-col" + (dStr===todayKey() ? " is-today" : "") + (dStr===insightsSelected ? " selected" : "");
+      const pct = agg.pct===null ? 0 : agg.pct;
+      const cls = agg.pct===null ? "empty" : pctClass(agg.pct);
+      col.innerHTML = `
+        <div class="chart-bar-value">${agg.pct===null ? "—" : agg.pct+"%"}</div>
+        <div class="chart-bar ${cls}" style="height:${Math.max(pct,4)}%"></div>
+        <div class="chart-bar-label">${WD_SHORT[d.getDay()]}<br>${jalaliDayNum(d)}</div>
+      `;
+      col.addEventListener("click", async ()=>{
+        insightsSelected = dStr;
+        await renderInsightsDaily();
+        await showDayDetail(d);
+      });
+      wrap.appendChild(col);
+    }
+
+    if(insightsSelected){
+      const sel = dates.find(d=>dateKey(d)===insightsSelected);
+      if(sel) await showDayDetail(sel);
+    }
+  }
+
+  async function showDayDetail(d){
+    const dStr = dateKey(d);
+    const applicable = recurringTasks.filter(t=>t.days.includes(d.getDay()));
+    const card = document.getElementById("insightsDetailCard");
+    document.getElementById("insightsDetailTitle").textContent = `${fmtDayTitle(d)} — ${fmtDeadline(dStr)}`;
+    const body = document.getElementById("insightsDetailBody");
+    body.innerHTML = "";
+
+    if(applicable.length===0){
+      body.innerHTML = `<div class="empty-note">برای این روز کار تکرارشونده‌ای برنامه‌ریزی نشده بود.</div>`;
+    } else {
+      const record = await getRecordForDate(dStr);
+      applicable.forEach(t=>{
+        const done = !!(record.tasks && record.tasks[t.id]);
+        const row = document.createElement("div");
+        row.className = "task-row";
+        row.innerHTML = `<div class="checkbox ${done?"checked":""}">${checkSvg}</div><div class="txt ${done?"done":""}">${escapeHtml(t.title)}</div>`;
+        row.querySelector(".checkbox").addEventListener("click", async ()=>{
+          const r = await getRecordForDate(dStr);
+          r.tasks[t.id] = !r.tasks[t.id];
+          await saveRecordForDate(dStr, r);
+          if(insightsMode==="daily") await renderInsightsDaily();
+          else await renderInsightsWeekly();
+        });
+        body.appendChild(row);
+      });
+    }
+    card.style.display = "block";
+  }
+
+  async function renderInsightsWeekly(){
+    document.getElementById("insightsChartTitle").textContent = "۱۰ هفته اخیر";
+    const dates = lastNDatesInclusiveToday(70); // 10 weeks
+    const aggs = [];
+    for(const d of dates) aggs.push(await dayAggregate(d));
+
+    const weeks = [];
+    for(let w=0; w<10; w++){
+      const startIdx = w*7, endIdx = startIdx+6;
+      const weekDates = dates.slice(startIdx, endIdx+1);
+      const weekAggs = aggs.slice(startIdx, endIdx+1);
+      let applicable = 0, done = 0;
+      weekAggs.forEach(a=>{ applicable += a.applicable; done += a.done; });
+      weeks.push({
+        idx:w, dates:weekDates,
+        label: w===9 ? "این هفته" : `${9-w} هفته پیش`,
+        pct: applicable===0 ? null : Math.round((done/applicable)*100)
+      });
+    }
+
+    const wrap = document.getElementById("insightsChartWrap");
+    wrap.innerHTML = "";
+    weeks.forEach(w=>{
+      const col = document.createElement("div");
+      col.className = "chart-bar-col" + (w.idx===9 ? " is-today" : "") + (w.idx===insightsSelected ? " selected" : "");
+      const pct = w.pct===null ? 0 : w.pct;
+      const cls = w.pct===null ? "empty" : pctClass(w.pct);
+      col.innerHTML = `
+        <div class="chart-bar-value">${w.pct===null ? "—" : w.pct+"%"}</div>
+        <div class="chart-bar ${cls}" style="height:${Math.max(pct,4)}%"></div>
+        <div class="chart-bar-label">${w.idx===9 ? "این هفته" : (9-w.idx)}</div>
+      `;
+      col.addEventListener("click", async ()=>{
+        insightsSelected = w.idx;
+        await renderInsightsWeekly();
+        await showWeekDetail(w);
+      });
+      wrap.appendChild(col);
+    });
+
+    if(insightsSelected!==null){
+      const sel = weeks.find(w=>w.idx===insightsSelected);
+      if(sel) await showWeekDetail(sel);
+    }
+  }
+
+  async function showWeekDetail(week){
+    const card = document.getElementById("insightsDetailCard");
+    document.getElementById("insightsDetailTitle").textContent = week.label;
+    const body = document.getElementById("insightsDetailBody");
+    body.innerHTML = "";
+
+    for(const d of week.dates){
+      const agg = await dayAggregate(d);
+      const row = document.createElement("div");
+      row.className = "week-mini-row";
+      const pct = agg.pct===null ? 0 : agg.pct;
+      const cls = agg.pct===null ? "empty" : pctClass(agg.pct);
+      const colorVar = cls==="c0" ? "var(--danger)" : cls==="c1" ? "var(--warn)" : cls==="c2" ? "#8FB79A" : cls==="c3" ? "var(--day-accent)" : "var(--paper-dark)";
+      row.innerHTML = `
+        <div class="wm-label">${fmtDayTitle(d)} <span style="color:var(--ink-soft);font-weight:400;">${fmtDeadline(dateKey(d))}</span></div>
+        <div class="wm-bar-track"><div class="wm-bar-fill" style="width:${pct}%;background:${colorVar}"></div></div>
+        <div class="wm-pct">${agg.pct===null ? "—" : agg.pct+"%"}</div>
+      `;
+      row.addEventListener("click", async ()=>{
+        insightsMode = "daily";
+        insightsSelected = dateKey(d);
+        document.querySelectorAll(".seg-btn").forEach(b=>b.classList.toggle("on", b.dataset.mode==="daily"));
+        await renderInsightsDaily();
+      });
+      body.appendChild(row);
+    }
+    card.style.display = "block";
+  }
+
+
+  init();
+})();
+</script>
+</body>
+</html>
