@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>دفترچه برنامه‌ریزی</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
   :root{
     --paper:#ECEAE0;
@@ -114,6 +112,14 @@
   .del-btn{ border:none;background:none;cursor:pointer; color:var(--ink-soft); font-size:16px; opacity:.5; padding:2px 4px; }
   .del-btn:hover{ opacity:1; color:var(--danger); }
 
+  .task-actions{ display:flex; align-items:center; gap:3px; flex-shrink:0; }
+  .task-action{ border:1px solid var(--line); background:#fff; color:var(--ink-soft); cursor:pointer; min-width:28px; height:28px; padding:0 6px; border-radius:6px; font-family:'Vazirmatn',sans-serif; font-size:11px; line-height:1; }
+  .task-action:hover{ background:var(--paper-dark); color:var(--ink); }
+  .task-action.edit:hover{ color:var(--week-accent); border-color:var(--week-accent); }
+  .task-action.danger:hover{ color:var(--danger); border-color:var(--danger); }
+  .task-action:disabled{ opacity:.35; cursor:default; }
+  .rec-item .task-actions{ margin-right:auto; }
+
   .empty-note{ text-align:center; color:var(--ink-soft); font-size:13px; padding:18px 6px; }
   .section-label{ font-size:11px; color:var(--ink-soft); font-family:'JetBrains Mono',monospace; margin:14px 0 4px; letter-spacing:.4px; }
 
@@ -172,6 +178,31 @@
   .chart-bar.empty{ background:var(--paper-dark); opacity:.35; }
   .chart-bar-label{ font-size:9px; color:var(--ink-soft); margin-top:6px; font-family:'JetBrains Mono',monospace; text-align:center; line-height:1.3; }
 
+
+  .line-chart-wrap{ margin-top:18px; border-top:1px dashed var(--line); padding-top:14px; }
+  .line-chart-title{ display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:12px; color:var(--ink-soft); margin-bottom:8px; }
+  .line-chart-title strong{ color:var(--ink); font-size:13px; }
+  .line-chart{ width:100%; height:190px; display:block; overflow:visible; }
+  .line-grid{ stroke:var(--line); stroke-width:1; stroke-dasharray:3 4; opacity:.7; }
+  .line-path{ fill:none; stroke:var(--insights-accent); stroke-width:3; stroke-linecap:round; stroke-linejoin:round; filter:drop-shadow(0 2px 3px rgba(46,110,142,.16)); }
+  .line-area{ fill:var(--insights-accent-soft); opacity:.55; }
+  .line-point{ fill:var(--paper); stroke:var(--insights-accent); stroke-width:2.5; transition:transform .18s ease; transform-box:fill-box; transform-origin:center; cursor:pointer; }
+  .line-point:hover{ transform:scale(1.45); }
+  .line-axis-label{ fill:var(--ink-soft); font-size:10px; font-family:'JetBrains Mono',monospace; }
+  .line-empty{ fill:var(--ink-soft); font-size:12px; }
+  @media(max-width:600px){ .line-chart{ height:165px; } }
+  /* Lightweight completion celebrations */
+  .celebrate-layer{position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden;}
+  .celebrate-toast{position:fixed;top:18%;left:50%;transform:translate(-50%,-10px) scale(.92);padding:12px 18px;border:1px solid rgba(255,255,255,.7);border-radius:999px;background:rgba(255,255,255,.94);box-shadow:0 12px 40px rgba(34,40,44,.18);color:var(--ink);font-weight:800;font-size:14px;opacity:0;animation:celebrateToast 1.9s cubic-bezier(.2,.8,.2,1) forwards;}
+  .celebrate-particle{position:absolute;left:50%;top:50%;font-size:18px;line-height:1;will-change:transform,opacity;animation:celebrateParticle .95s cubic-bezier(.2,.75,.2,1) forwards;}
+  .celebrate-confetti{position:absolute;width:8px;height:13px;border-radius:2px;left:50%;top:48%;will-change:transform,opacity;animation:confettiFly 1.15s cubic-bezier(.15,.8,.25,1) forwards;}
+  .celebrate-spark{position:absolute;left:50%;top:48%;font-size:20px;will-change:transform,opacity;animation:sparkFly 1s ease-out forwards;}
+  @keyframes celebrateToast{0%{opacity:0;transform:translate(-50%,-10px) scale(.92)}15%,75%{opacity:1;transform:translate(-50%,0) scale(1)}100%{opacity:0;transform:translate(-50%,-6px) scale(.98)}}
+  @keyframes celebrateParticle{0%{opacity:0;transform:translate(-50%,-50%) scale(.5) rotate(0)}15%{opacity:1}100%{opacity:0;transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) scale(1.15) rotate(var(--r))}}
+  @keyframes confettiFly{0%{opacity:1;transform:translate(-50%,-50%) rotate(0) scale(.8)}100%{opacity:0;transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) rotate(var(--r)) scale(1)}}
+  @keyframes sparkFly{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}15%{opacity:1}100%{opacity:0;transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) scale(1.4)}}
+  @media (prefers-reduced-motion: reduce){.celebrate-toast,.celebrate-particle,.celebrate-confetti,.celebrate-spark{animation:none!important}.celebrate-toast{opacity:1;transform:translate(-50%,0);}}
+
   .week-mini-row{ display:flex; align-items:center; gap:10px; padding:9px 4px; border-bottom:1px dashed var(--line); cursor:pointer; }
   .week-mini-row:last-child{ border-bottom:none; }
   .week-mini-row:hover{ background:var(--insights-accent-soft); border-radius:6px; }
@@ -185,9 +216,91 @@
 
   footer.status{ text-align:center; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--ink-soft); margin-top:26px; opacity:.7; }
 
-  @media (max-width:520px){
-    .tab-btn{ font-size:11px; padding:10px 4px 12px; }
-    .nav-row .nav-title{ font-size:16px; }
+  @media (max-width:700px){
+    .app{max-width:100%;padding:12px 10px 42px;}
+    header.masthead{padding:7px 2px 13px;margin-bottom:12px;align-items:flex-end;}
+    header.masthead h1{font-size:18px;}
+    header.masthead .tagline{font-size:9px;}
+    .tabs{gap:4px;margin-bottom:14px;}
+    .tab-btn{min-width:0;font-size:10.5px;padding:9px 4px 11px;}
+    .tab-btn small{font-size:7px;}
+    .card{padding:13px 12px;margin-bottom:11px;border-radius:9px;}
+    .card h2{font-size:13.5px;}
+    .task-row{gap:8px;padding:9px 2px;align-items:flex-start;}
+    .task-row .txt{font-size:13px;line-height:1.65;min-width:0;}
+    .checkbox{width:21px;height:21px;margin-top:2px;}
+    .task-actions{gap:3px;flex-wrap:wrap;justify-content:flex-end;max-width:145px;}
+    .task-action{min-width:27px;height:27px;padding:0 5px;font-size:10px;}
+    .del-btn{font-size:15px;padding:2px;}
+    .add-row{gap:6px;}
+    .add-row input[type="text"]{min-width:0;width:100%;flex-basis:100%;font-size:13px;}
+    .add-row input[type="date"]{flex:1;min-width:0;}
+    .add-btn{min-height:40px;padding:0 13px;}
+    .nav-row{gap:8px;margin-bottom:13px;}
+    .nav-row .nav-title{font-size:15px;}
+    .nav-row .nav-sub{font-size:10px;}
+    .nav-btn{width:32px;height:32px;}
+    .today-btn{padding:0 8px;font-size:10px;}
+    .day-picker{gap:5px;}
+    .day-chip{padding:6px 8px;font-size:10px;}
+    .chart-wrap{height:135px;gap:3px;}
+    .chart-bar{max-width:22px;}
+    .line-chart{height:150px;}
+    .line-chart-title{font-size:11px;}
+  }
+  @media (max-width:420px){
+    .tab-btn{font-size:9.5px;}
+    .tab-btn small{display:none;}
+    .task-actions{max-width:118px;}
+    .task-action{min-width:25px;height:26px;font-size:9px;}
+    .rec-item-top{align-items:flex-start;}
+    .rec-item-top .txt{font-size:13px;line-height:1.6;}
+  }
+
+  /* ---------- lightweight visual polish ---------- */
+  :root{ --motion-fast:180ms; --motion:280ms; }
+  body::before{
+    content:""; position:fixed; inset:-20%; pointer-events:none; z-index:-1;
+    background:radial-gradient(circle at 15% 15%, rgba(122,75,107,.075), transparent 28%),
+               radial-gradient(circle at 85% 22%, rgba(62,110,100,.065), transparent 25%),
+               radial-gradient(circle at 50% 90%, rgba(72,85,126,.055), transparent 30%);
+    animation:plannerAura 18s ease-in-out infinite alternate;
+    will-change:transform,opacity;
+  }
+  .masthead{position:relative;overflow:hidden}
+  .masthead::after{
+    content:"";position:absolute;left:-15%;top:0;width:45%;height:100%;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.28),transparent);
+    transform:skewX(-18deg);animation:plannerSheen 8s ease-in-out infinite;pointer-events:none;
+  }
+  .card{
+    transform:translateY(0); transition:transform var(--motion) ease, box-shadow var(--motion) ease, border-color var(--motion) ease;
+    animation:plannerCardIn 420ms cubic-bezier(.2,.8,.2,1) both;
+  }
+  .card:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(34,40,44,.055)}
+  .tab-btn{transition:transform var(--motion-fast) ease, background var(--motion-fast) ease, color var(--motion-fast) ease}
+  .tab-btn:hover{transform:translateY(-1px)}
+  .tab-btn:active,.task-action:active,.qw-btn:active,.today-btn:active,.seg-btn:active{transform:scale(.96)}
+  .task-row,.rec-item,.week-mini-row,.target-row,.day-chip,.qw-btn,.task-action{transition:transform var(--motion-fast) ease, background var(--motion-fast) ease, opacity var(--motion-fast) ease}
+  .task-row:hover,.rec-item:hover,.target-row:hover{transform:translateX(-2px)}
+  .task-row.just-added,.rec-item.just-added{animation:plannerTaskIn 420ms cubic-bezier(.2,.8,.2,1) both}
+  .task-row.is-complete,.rec-item.is-complete{animation:plannerComplete 360ms ease both}
+  .progress-fill{position:relative;overflow:hidden}
+  .progress-fill::after{content:"";position:absolute;inset:0;transform:translateX(-110%);background:linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent);animation:plannerProgressShine 2.8s ease-in-out infinite}
+  .planner-ripple{position:fixed;width:12px;height:12px;border-radius:50%;pointer-events:none;background:currentColor;opacity:.18;transform:translate(-50%,-50%) scale(0);animation:plannerRipple 500ms ease-out forwards;z-index:9999}
+  .planner-confetti{position:fixed;width:6px;height:10px;border-radius:2px;pointer-events:none;z-index:9999;animation:plannerConfetti 720ms cubic-bezier(.15,.7,.2,1) forwards}
+  .external-fallback-note{position:fixed;bottom:12px;left:12px;font-size:10px;padding:6px 9px;border:1px solid var(--line);background:rgba(255,255,255,.88);border-radius:999px;color:var(--ink-soft);opacity:0;transition:opacity .25s ease;z-index:9998}
+  .external-fallback-note.show{opacity:1}
+  @keyframes plannerCardIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+  @keyframes plannerTaskIn{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:none}}
+  @keyframes plannerComplete{0%{transform:scale(1)}45%{transform:scale(1.018)}100%{transform:scale(1)}}
+  @keyframes plannerSheen{0%,65%{transform:translateX(-140%) skewX(-18deg)}100%{transform:translateX(430%) skewX(-18deg)}}
+  @keyframes plannerAura{from{transform:translate3d(-1%,0,0) scale(1)}to{transform:translate3d(1%,1%,0) scale(1.035)}}
+  @keyframes plannerProgressShine{0%,55%{transform:translateX(-110%)}100%{transform:translateX(110%)}}
+  @keyframes plannerRipple{to{transform:translate(-50%,-50%) scale(13);opacity:0}}
+  @keyframes plannerConfetti{0%{transform:translate(0,0) rotate(0);opacity:1}100%{transform:translate(var(--dx),var(--dy)) rotate(var(--rot));opacity:0}}
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.001ms!important}
   }
 </style>
 </head>
@@ -295,6 +408,7 @@
 
     <div class="card week">
       <h2><span class="dot"></span>لیست برنامه‌های هفتگی</h2>
+      <p class="hint">ویرایش نام برنامه و تغییر اولویت فقط از همین بخش انجام می‌شود.</p>
       <div id="weekList"></div>
     </div>
   </section>
@@ -352,6 +466,14 @@
         <span><i style="background:var(--warn)"></i>متوسط</span>
         <span><i style="background:var(--danger)"></i>ضعیف</span>
         <span><i style="background:var(--paper-dark);opacity:.5"></i>برنامه‌ای نبوده</span>
+      </div>
+    </div>
+
+
+    <div class="card insights">
+      <div class="line-chart-title"><strong>روند عملکرد</strong><span>همان داده‌های بالا، به شکل خطی</span></div>
+      <div class="line-chart-wrap" style="border-top:none;padding-top:0;margin-top:0;">
+        <svg class="line-chart" id="insightsLineChart" viewBox="0 0 700 190" preserveAspectRatio="none" role="img" aria-label="نمودار خطی عملکرد"></svg>
       </div>
     </div>
 
@@ -530,6 +652,125 @@
     return recurringTasks.filter(t => t.days.includes(d.getDay()));
   }
 
+  function taskActionsHtml(type, id, index, length, allowEdit=false){
+    const atFirst = index === 0;
+    const atLast = index === length - 1;
+    return `<div class="task-actions">
+      ${allowEdit ? `<button class="task-action edit" data-action="edit" data-type="${type}" data-id="${id}" title="ویرایش نام">ویرایش</button>` : ""}
+      <button class="task-action" data-action="first" data-type="${type}" data-id="${id}" title="بردن به اول" ${atFirst?"disabled":""}>اول</button>
+      <button class="task-action" data-action="up" data-type="${type}" data-id="${id}" title="یک جایگاه بالاتر" ${atFirst?"disabled":""}>↑</button>
+      <button class="task-action" data-action="down" data-type="${type}" data-id="${id}" title="یک جایگاه پایین‌تر" ${atLast?"disabled":""}>↓</button>
+      <button class="task-action" data-action="last" data-type="${type}" data-id="${id}" title="بردن به آخر" ${atLast?"disabled":""}>آخر</button>
+    </div>`;
+  }
+
+  async function editRecurring(id){
+    const t = recurringTasks.find(x=>x.id===id);
+    if(!t) return;
+    const next = prompt("نام جدید این کار را وارد کن:", t.title);
+    if(next===null) return;
+    const title = next.trim();
+    if(!title){ setStatus("نام کار نمی‌تواند خالی باشد"); return; }
+    t.title = title;
+    await storeSet("recurring-tasks", recurringTasks);
+    renderWeekList(); renderDay(); renderHome();
+  }
+
+  async function moveRecurring(id, mode){
+    const idx = recurringTasks.findIndex(x=>x.id===id);
+    if(idx<0) return;
+    let target = idx;
+    if(mode === "up") target = Math.max(0, idx-1);
+    if(mode === "down") target = Math.min(recurringTasks.length-1, idx+1);
+    if(mode === "first") target = 0;
+    if(mode === "last") target = recurringTasks.length-1;
+    if(target === idx) return;
+    const [item] = recurringTasks.splice(idx,1);
+    recurringTasks.splice(target,0,item);
+    await storeSet("recurring-tasks", recurringTasks);
+    renderWeekList(); renderDay(); renderHome();
+  }
+
+  async function editExtra(ex, saveRecord){
+    const next = prompt("نام جدید این کار را وارد کن:", ex.text);
+    if(next===null) return;
+    const text = next.trim();
+    if(!text){ setStatus("نام کار نمی‌تواند خالی باشد"); return; }
+    ex.text = text;
+    await saveRecord();
+  }
+
+  async function moveExtra(exId, mode, record, saveRecord){
+    const idx = record.extras.findIndex(x=>x.id===exId);
+    if(idx<0) return;
+    let target = idx;
+    if(mode === "up") target = Math.max(0, idx-1);
+    if(mode === "down") target = Math.min(record.extras.length-1, idx+1);
+    if(mode === "first") target = 0;
+    if(mode === "last") target = record.extras.length-1;
+    if(target === idx) return;
+    const [item] = record.extras.splice(idx,1);
+    record.extras.splice(target,0,item);
+    await saveRecord();
+  }
+
+  // ================= COMPLETION CELEBRATIONS =================
+  function completionState(record, recurringList){
+    const total = recurringList.length + record.extras.length;
+    const done = recurringList.filter(t=>!!record.tasks[t.id]).length + record.extras.filter(e=>e.done).length;
+    return {total, done, allDone: total>0 && done===total};
+  }
+
+  function celebrateCompletion(label, allDone=false){
+    const layer = document.createElement("div");
+    layer.className = "celebrate-layer";
+    document.body.appendChild(layer);
+    const messages = allDone
+      ? ["همه کارهای امروز انجام شد! 🎉", "امروز رو ترکوندی! 🔥", "عالی بود؛ همه‌چی تموم شد! ✨"]
+      : ["آفرین! یکی دیگه هم تموم شد ✓", "دمت گرم! یه قدم دیگه جلو رفتی 💪", "عالیه! ادامه بده ✨", "انجام شد! همین‌طور پیش برو 🚀"];
+    const toast = document.createElement("div");
+    toast.className="celebrate-toast";
+    toast.textContent = messages[Math.floor(Math.random()*messages.length)] + (label ? `  ${label}` : "");
+    layer.appendChild(toast);
+
+    const mode = allDone ? "fireworks" : ["confetti","sparkles","stars","burst"][Math.floor(Math.random()*4)];
+    if(mode === "confetti" || mode === "fireworks") {
+      const count = mode === "fireworks" ? 46 : 28;
+      for(let i=0;i<count;i++){
+        const el=document.createElement("i"); el.className="celebrate-confetti";
+        el.style.setProperty("--x", `${(Math.random()*2-1)*Math.min(innerWidth*.44,360)}px`);
+        el.style.setProperty("--y", `${-80-Math.random()*Math.min(innerHeight*.48,420)}px`);
+        el.style.setProperty("--r", `${Math.random()*720-360}deg`);
+        el.style.width=`${5+Math.random()*5}px`; el.style.height=`${9+Math.random()*8}px`;
+        el.style.opacity=`${.7+Math.random()*.3}`;
+        el.style.background=`hsl(${Math.floor(Math.random()*360)} 70% 55%)`;
+        el.style.animationDelay=`${Math.random()*.18}s`; layer.appendChild(el);
+      }
+    }
+    const glyphs = mode === "stars" ? ["✦","✧","★","✦"] : mode === "sparkles" ? ["✦","✨","✧"] : ["🎉","✨","⭐","💫"];
+    const count = mode === "fireworks" ? 22 : 14;
+    for(let i=0;i<count;i++){
+      const el=document.createElement("span"); el.className="celebrate-particle";
+      el.textContent=glyphs[Math.floor(Math.random()*glyphs.length)];
+      el.style.setProperty("--x", `${(Math.random()*2-1)*Math.min(innerWidth*.42,340)}px`);
+      el.style.setProperty("--y", `${(Math.random()*2-1)*Math.min(innerHeight*.30,250)}px`);
+      el.style.setProperty("--r", `${Math.random()*420-210}deg`);
+      el.style.animationDelay=`${Math.random()*.12}s`; layer.appendChild(el);
+    }
+    if(mode === "fireworks"){
+      ["22%","50%","72%"].forEach((left, burstIndex)=>{
+        for(let i=0;i<14;i++){
+          const el=document.createElement("span"); el.className="celebrate-spark"; el.textContent="✦";
+          el.style.left=left; el.style.top=`${30+burstIndex*10}%`;
+          el.style.setProperty("--x", `${(Math.random()*2-1)*95}px`);
+          el.style.setProperty("--y", `${(Math.random()*2-1)*85}px`);
+          el.style.animationDelay=`${.12*burstIndex+Math.random()*.2}s`; layer.appendChild(el);
+        }
+      });
+    }
+    setTimeout(()=>layer.remove(), 2300);
+  }
+
   // ---------- render: Day tab ----------
   function renderDay(){
     const list = todaysRecurringFor(dayDate);
@@ -538,15 +779,20 @@
     if(list.length===0){
       wrap.innerHTML = `<div class="empty-note">برای این روز کار تکرارشونده‌ای تعریف نشده. از تب «برنامه هفتگی» اضافه کن.</div>`;
     } else {
-      list.forEach(t=>{
+      list.forEach((t, index)=>{
         const done = !!dayRecord.tasks[t.id];
         const row = document.createElement("div");
         row.className = "task-row";
-        row.innerHTML = `<div class="checkbox ${done?"checked":""}" data-id="${t.id}">${checkSvg}</div><div class="txt ${done?"done":""}">${escapeHtml(t.title)}</div>`;
+        const globalIndex = recurringTasks.findIndex(x=>x.id===t.id);
+        row.innerHTML = `<div class="checkbox ${done?"checked":""}" data-id="${t.id}">${checkSvg}</div><div class="txt ${done?"done":""}">${escapeHtml(t.title)}</div>${taskActionsHtml("recurring", t.id, globalIndex, recurringTasks.length)}`;
         row.querySelector(".checkbox").addEventListener("click", async ()=>{
-          dayRecord.tasks[t.id] = !dayRecord.tasks[t.id];
+          const wasDone = !!dayRecord.tasks[t.id];
+          dayRecord.tasks[t.id] = !wasDone;
+          const state = completionState(dayRecord, list);
           await saveDay();
+          if(!wasDone) celebrateCompletion(t.title, state.allDone);
         });
+        row.querySelectorAll(".task-action:not(.edit)").forEach(btn=>btn.addEventListener("click", ()=>moveRecurring(t.id, btn.dataset.action)));
         wrap.appendChild(row);
       });
     }
@@ -556,11 +802,18 @@
     if(dayRecord.extras.length===0){
       exWrap.innerHTML = `<div class="empty-note">هنوز کار اضافه‌ای برای این روز ثبت نشده.</div>`;
     } else {
-      dayRecord.extras.forEach(ex=>{
+      dayRecord.extras.forEach((ex, index)=>{
         const row = document.createElement("div");
         row.className = "task-row";
-        row.innerHTML = `<div class="checkbox ${ex.done?"checked":""}" data-id="${ex.id}">${checkSvg}</div><div class="txt ${ex.done?"done":""}">${escapeHtml(ex.text)}</div><button class="del-btn" data-id="${ex.id}">✕</button>`;
-        row.querySelector(".checkbox").addEventListener("click", async ()=>{ ex.done = !ex.done; await saveDay(); });
+        row.innerHTML = `<div class="checkbox ${ex.done?"checked":""}" data-id="${ex.id}">${checkSvg}</div><div class="txt ${ex.done?"done":""}">${escapeHtml(ex.text)}</div>${taskActionsHtml("extra", ex.id, index, dayRecord.extras.length)}<button class="del-btn" data-id="${ex.id}" title="حذف">✕</button>`;
+        row.querySelector(".checkbox").addEventListener("click", async ()=>{
+          const wasDone = !!ex.done;
+          ex.done = !wasDone;
+          const state = completionState(dayRecord, list);
+          await saveDay();
+          if(!wasDone) celebrateCompletion(ex.text, state.allDone);
+        });
+        row.querySelectorAll(".task-action:not(.edit)").forEach(btn=>btn.addEventListener("click", ()=>moveExtra(ex.id, btn.dataset.action, dayRecord, saveDay)));
         row.querySelector(".del-btn").addEventListener("click", async ()=>{ dayRecord.extras = dayRecord.extras.filter(e=>e.id!==ex.id); await saveDay(); });
         exWrap.appendChild(row);
       });
@@ -630,13 +883,15 @@
       wrap.innerHTML = `<div class="empty-note">هنوز برنامه تکرارشونده‌ای اضافه نکرده‌ای.</div>`;
       return;
     }
-    recurringTasks.forEach(t=>{
+    recurringTasks.forEach((t, index)=>{
       const item = document.createElement("div");
       item.className = "rec-item";
       const badges = t.days.slice()
         .sort((a,b)=> WEEKDAYS.findIndex(w=>w.idx===a) - WEEKDAYS.findIndex(w=>w.idx===b))
         .map(d=>`<span class="badge">${WD_SHORT[d]}</span>`).join("");
-      item.innerHTML = `<div class="rec-item-top"><div class="txt">${escapeHtml(t.title)}</div><button class="del-btn" data-id="${t.id}">✕</button></div><div class="badges">${badges}</div>`;
+      item.innerHTML = `<div class="rec-item-top"><div class="txt">${escapeHtml(t.title)}</div>${taskActionsHtml("recurring", t.id, index, recurringTasks.length, true)}<button class="del-btn" data-id="${t.id}" title="حذف">✕</button></div><div class="badges">${badges}</div>`;
+      item.querySelector('[data-action="edit"]').addEventListener("click", ()=>editRecurring(t.id));
+      item.querySelectorAll(".task-action:not(.edit)").forEach(btn=>btn.addEventListener("click", ()=>moveRecurring(t.id, btn.dataset.action)));
       item.querySelector(".del-btn").addEventListener("click", async ()=>{
         recurringTasks = recurringTasks.filter(x=>x.id!==t.id);
         await storeSet("recurring-tasks", recurringTasks);
@@ -686,10 +941,12 @@
   async function toggleTarget(id){
     const t = targets.find(x=>x.id===id);
     if(!t) return;
-    t.done = !t.done;
+    const wasDone = !!t.done;
+    t.done = !wasDone;
     await storeSet("targets", targets);
     renderTargets();
     renderHome();
+    if(!wasDone) celebrateCompletion(t.text, false);
   }
   async function deleteTarget(id){
     targets = targets.filter(x=>x.id!==id);
@@ -772,12 +1029,17 @@
         const done = !!rec.tasks[t.id];
         const row = document.createElement("div");
         row.className = "task-row";
-        row.innerHTML = `<div class="checkbox ${done?"checked":""}" data-id="${t.id}">${checkSvg}</div><div class="txt ${done?"done":""}">${escapeHtml(t.title)}</div>`;
+        const globalIndex = recurringTasks.findIndex(x=>x.id===t.id);
+        row.innerHTML = `<div class="checkbox ${done?"checked":""}" data-id="${t.id}">${checkSvg}</div><div class="txt ${done?"done":""}">${escapeHtml(t.title)}</div>${taskActionsHtml("recurring", t.id, globalIndex, recurringTasks.length)}`;
         row.querySelector(".checkbox").addEventListener("click", async ()=>{
           const r = await getHomeRecord();
-          r.tasks[t.id] = !r.tasks[t.id];
+          const wasDone = !!r.tasks[t.id];
+          r.tasks[t.id] = !wasDone;
+          const state = completionState(r, list);
           await saveHomeRecord(r);
+          if(!wasDone) celebrateCompletion(t.title, state.allDone);
         });
+        row.querySelectorAll(".task-action:not(.edit)").forEach(btn=>btn.addEventListener("click", ()=>moveRecurring(t.id, btn.dataset.action)));
         recWrap.appendChild(row);
       });
     }
@@ -787,16 +1049,24 @@
     if(rec.extras.length===0){
       exWrap.innerHTML = `<div class="empty-note">هنوز کار اضافه‌ای برای امروز ثبت نشده.</div>`;
     } else {
-      rec.extras.forEach(ex=>{
+      rec.extras.forEach((ex, index)=>{
         const row = document.createElement("div");
         row.className = "task-row";
-        row.innerHTML = `<div class="checkbox ${ex.done?"checked":""}" data-id="${ex.id}">${checkSvg}</div><div class="txt ${ex.done?"done":""}">${escapeHtml(ex.text)}</div><button class="del-btn" data-id="${ex.id}">✕</button>`;
+        row.innerHTML = `<div class="checkbox ${ex.done?"checked":""}" data-id="${ex.id}">${checkSvg}</div><div class="txt ${ex.done?"done":""}">${escapeHtml(ex.text)}</div>${taskActionsHtml("extra", ex.id, index, rec.extras.length)}<button class="del-btn" data-id="${ex.id}" title="حذف">✕</button>`;
         row.querySelector(".checkbox").addEventListener("click", async ()=>{
           const r = await getHomeRecord();
           const target = r.extras.find(e=>e.id===ex.id);
-          if(target) target.done = !target.done;
+          if(!target) return;
+          const wasDone = !!target.done;
+          target.done = !wasDone;
+          const state = completionState(r, list);
           await saveHomeRecord(r);
+          if(!wasDone) celebrateCompletion(target.text, state.allDone);
         });
+        row.querySelectorAll(".task-action:not(.edit)").forEach(btn=>btn.addEventListener("click", async ()=>{
+          const r = await getHomeRecord();
+          await moveExtra(ex.id, btn.dataset.action, r, ()=>saveHomeRecord(r));
+        }));
         row.querySelector(".del-btn").addEventListener("click", async ()=>{
           const r = await getHomeRecord();
           r.extras = r.extras.filter(e=>e.id!==ex.id);
@@ -924,10 +1194,12 @@
     const dates = lastNDatesInclusiveToday(14);
     const wrap = document.getElementById("insightsChartWrap");
     wrap.innerHTML = "";
+    const lineData = [];
 
     for(const d of dates){
       const dStr = dateKey(d);
       const agg = await dayAggregate(d);
+      lineData.push({label:`${WD_SHORT[d.getDay()]} ${jalaliDayNum(d)}`, pct:agg.pct});
       const col = document.createElement("div");
       col.className = "chart-bar-col" + (dStr===todayKey() ? " is-today" : "") + (dStr===insightsSelected ? " selected" : "");
       const pct = agg.pct===null ? 0 : agg.pct;
@@ -944,6 +1216,8 @@
       });
       wrap.appendChild(col);
     }
+
+    renderInsightsLineChart(lineData);
 
     if(insightsSelected){
       const sel = dates.find(d=>dateKey(d)===insightsSelected);
@@ -1021,10 +1295,46 @@
       wrap.appendChild(col);
     });
 
+    renderInsightsLineChart(weeks.map(w=>({label:w.idx===9?"این هفته":`${9-w.idx}`, pct:w.pct})));
+
     if(insightsSelected!==null){
       const sel = weeks.find(w=>w.idx===insightsSelected);
       if(sel) await showWeekDetail(sel);
     }
+  }
+
+  function renderInsightsLineChart(points){
+    const svg=document.getElementById("insightsLineChart");
+    if(!svg) return;
+    const W=700,H=190, padL=34,padR=14,padT=14,padB=28;
+    const valid=points.filter(p=>p.pct!==null && Number.isFinite(p.pct));
+    if(!valid.length){
+      svg.innerHTML=`<text x="350" y="96" text-anchor="middle" class="line-empty">هنوز داده‌ای برای نمایش روند وجود ندارد</text>`;
+      return;
+    }
+    const x=i=>padL+(points.length===1? (W-padL-padR)/2 : i*(W-padL-padR)/(points.length-1));
+    const y=v=>padT+(100-v)*(H-padT-padB)/100;
+    let grid="";
+    [0,25,50,75,100].forEach(v=>{
+      const yy=y(v);
+      grid+=`<line class="line-grid" x1="${padL}" y1="${yy}" x2="${W-padR}" y2="${yy}"/>`;
+      grid+=`<text class="line-axis-label" x="${padL-7}" y="${yy+3}" text-anchor="end">${v}%</text>`;
+    });
+    const coords=points.map((p,i)=>[x(i),p.pct===null?null:y(p.pct)]);
+    let path="", area="";
+    let started=false;
+    coords.forEach((c,i)=>{
+      if(c[1]===null){started=false; return;}
+      path += (started?` L ${c[0]} ${c[1]}`:` M ${c[0]} ${c[1]}`); started=true;
+    });
+    const first=coords.find(c=>c[1]!==null), last=[...coords].reverse().find(c=>c[1]!==null);
+    if(first && last) area=`M ${first[0]} ${H-padB} L ${first[0]} ${first[1]} ${path.replace(/^ M /,' L ')} L ${last[0]} ${H-padB} Z`;
+    const dots=points.map((p,i)=>p.pct===null?"":`<circle class="line-point" cx="${x(i)}" cy="${y(p.pct)}" r="4" data-index="${i}"><title>${p.label}: ${p.pct}%</title></circle>`).join("");
+    const labels=points.map((p,i)=>{
+      const show=points.length<=14 || i===0 || i===points.length-1 || i%2===0;
+      return show?`<text class="line-axis-label" x="${x(i)}" y="${H-8}" text-anchor="middle">${escapeHtml(p.label)}</text>`:"";
+    }).join("");
+    svg.innerHTML=`${grid}<path class="line-area" d="${area}"/><path class="line-path" d="${path}"/>${dots}${labels}`;
   }
 
   async function showWeekDetail(week){
@@ -1058,6 +1368,89 @@
 
 
   init();
+})();
+</script>
+
+<script>
+(function(){
+  "use strict";
+  /* Optional remote assets: the app never depends on them. If a CDN is slow/unavailable,
+     the request is abandoned from the DOM and the built-in visual system continues. */
+  const ASSETS = [
+    {url:"https://cdn.jsdelivr.net/npm/@fontsource-variable/vazirmatn@5.3.0/index.css", timeout:1800, type:"font"},
+    {url:"https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css", timeout:1800, type:"motion"}
+  ];
+  const note=document.createElement("div");
+  note.className="external-fallback-note";
+  note.textContent="حالت سبک فعال است";
+  document.body.appendChild(note);
+  let fallbackCount=0;
+  function loadOptionalCss(asset){
+    return new Promise(resolve=>{
+      const link=document.createElement("link");
+      link.rel="stylesheet"; link.href=asset.url; link.dataset.optionalAsset=asset.type;
+      let settled=false;
+      const finish=(ok)=>{ if(settled)return; settled=true; clearTimeout(timer); resolve(ok); };
+      link.onload=()=>finish(true);
+      link.onerror=()=>{ link.remove(); fallbackCount++; finish(false); };
+      const timer=setTimeout(()=>{ link.remove(); fallbackCount++; finish(false); },asset.timeout);
+      document.head.appendChild(link);
+    });
+  }
+  Promise.all(ASSETS.map(loadOptionalCss)).then(results=>{
+    if(results.some(x=>!x)){
+      note.classList.add("show");
+      setTimeout(()=>note.classList.remove("show"),2200);
+    }
+  });
+
+  const reduceMotion=window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function ripple(x,y){
+    if(reduceMotion)return;
+    const el=document.createElement("span"); el.className="planner-ripple"; el.style.left=x+"px"; el.style.top=y+"px";
+    document.body.appendChild(el); setTimeout(()=>el.remove(),520);
+  }
+  document.addEventListener("pointerdown",e=>{
+    const target=e.target.closest("button,.task-action,.qw-btn,.day-chip,.tab-btn");
+    if(target) ripple(e.clientX,e.clientY);
+  },{passive:true});
+
+  function confetti(x,y){
+    if(reduceMotion)return;
+    const frag=document.createDocumentFragment();
+    for(let i=0;i<9;i++){
+      const el=document.createElement("i"); el.className="planner-confetti";
+      const angle=(Math.PI*2*i/9)+(Math.random()-.5)*.35, dist=28+Math.random()*42;
+      el.style.left=x+"px"; el.style.top=y+"px";
+      el.style.setProperty("--dx",Math.cos(angle)*dist+"px"); el.style.setProperty("--dy",Math.sin(angle)*dist+20+"px");
+      el.style.setProperty("--rot",(Math.random()*360-180)+"deg");
+      el.style.transform=`rotate(${Math.random()*30}deg)`;
+      frag.appendChild(el);
+    }
+    document.body.appendChild(frag); setTimeout(()=>document.querySelectorAll(".planner-confetti").forEach(x=>x.remove()),850);
+  }
+
+  /* Animate newly rendered task rows without a permanent animation loop. */
+  const observer=new MutationObserver(mutations=>{
+    for(const m of mutations){
+      for(const node of m.addedNodes){
+        if(node.nodeType!==1)continue;
+        if(node.matches?.(".task-row,.rec-item")) node.classList.add("just-added");
+        node.querySelectorAll?.(".task-row,.rec-item").forEach(el=>el.classList.add("just-added"));
+      }
+    }
+  });
+  observer.observe(document.body,{childList:true,subtree:true});
+
+  document.addEventListener("click",e=>{
+    const task=e.target.closest(".task-row,.rec-item");
+    const checkbox=e.target.closest("input[type=checkbox]");
+    if(task && checkbox && checkbox.checked){
+      task.classList.add("is-complete");
+      const r=task.getBoundingClientRect(); confetti(r.left+r.width/2,r.top+r.height/2);
+      setTimeout(()=>task.classList.remove("is-complete"),420);
+    }
+  });
 })();
 </script>
 </body>
