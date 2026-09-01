@@ -119,6 +119,10 @@
   .task-action.danger:hover{ color:var(--danger); border-color:var(--danger); }
   .task-action:disabled{ opacity:.35; cursor:default; }
   .rec-item .task-actions{ margin-right:auto; }
+  /* Smooth drag & drop */
+  .drag-handle{cursor:grab;user-select:none;color:var(--ink-soft);font-size:22px;line-height:1;padding:6px 8px;touch-action:none;border-radius:10px;transition:background .18s ease,color .18s ease,transform .18s ease}.drag-handle:hover{background:rgba(0,0,0,.05);color:var(--ink);transform:scale(1.06)}.drag-handle:active{cursor:grabbing}.sorting-active{user-select:none;cursor:grabbing}.task-row.dragging,.rec-item.dragging{visibility:hidden}.drag-ghost{position:fixed!important;z-index:9999!important;margin:0!important;pointer-events:none!important;opacity:.96!important;box-sizing:border-box!important;box-shadow:0 16px 38px rgba(0,0,0,.18)!important;transform:scale(1.015)!important;transition:box-shadow .16s ease,transform .16s ease!important;will-change:top,left,transform}.drag-item-anim{transition:transform .24s cubic-bezier(.2,.8,.2,1)}
+  @media (max-width:640px){.drag-handle{padding:8px 9px;font-size:24px}}
+
 
   .empty-note{ text-align:center; color:var(--ink-soft); font-size:13px; padding:18px 6px; }
   .section-label{ font-size:11px; color:var(--ink-soft); font-family:'JetBrains Mono',monospace; margin:14px 0 4px; letter-spacing:.4px; }
@@ -193,7 +197,7 @@
   @media(max-width:600px){ .line-chart{ height:165px; } }
   /* Lightweight completion celebrations */
   .celebrate-layer{position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden;}
-  .celebrate-toast{position:fixed;top:18%;left:50%;transform:translate(-50%,-10px) scale(.92);padding:12px 18px;border:1px solid rgba(255,255,255,.7);border-radius:999px;background:rgba(255,255,255,.94);box-shadow:0 12px 40px rgba(34,40,44,.18);color:var(--ink);font-weight:800;font-size:14px;opacity:0;animation:celebrateToast 1.9s cubic-bezier(.2,.8,.2,1) forwards;}
+  .celebrate-toast{display:none;position:fixed;top:18%;left:50%;transform:translate(-50%,-10px) scale(.92);padding:12px 18px;border:1px solid rgba(255,255,255,.7);border-radius:999px;background:rgba(255,255,255,.94);box-shadow:0 12px 40px rgba(34,40,44,.18);color:var(--ink);font-weight:800;font-size:14px;opacity:0;animation:celebrateToast 1.9s cubic-bezier(.2,.8,.2,1) forwards;}
   .celebrate-particle{position:absolute;left:50%;top:50%;font-size:18px;line-height:1;will-change:transform,opacity;animation:celebrateParticle .95s cubic-bezier(.2,.75,.2,1) forwards;}
   .celebrate-confetti{position:absolute;width:8px;height:13px;border-radius:2px;left:50%;top:48%;will-change:transform,opacity;animation:confettiFly 1.15s cubic-bezier(.15,.8,.25,1) forwards;}
   .celebrate-spark{position:absolute;left:50%;top:48%;font-size:20px;will-change:transform,opacity;animation:sparkFly 1s ease-out forwards;}
@@ -201,7 +205,7 @@
   @keyframes celebrateParticle{0%{opacity:0;transform:translate(-50%,-50%) scale(.5) rotate(0)}15%{opacity:1}100%{opacity:0;transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) scale(1.15) rotate(var(--r))}}
   @keyframes confettiFly{0%{opacity:1;transform:translate(-50%,-50%) rotate(0) scale(.8)}100%{opacity:0;transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) rotate(var(--r)) scale(1)}}
   @keyframes sparkFly{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}15%{opacity:1}100%{opacity:0;transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) scale(1.4)}}
-  @media (prefers-reduced-motion: reduce){.celebrate-toast,.celebrate-particle,.celebrate-confetti,.celebrate-spark{animation:none!important}.celebrate-toast{opacity:1;transform:translate(-50%,0);}}
+  @media (prefers-reduced-motion: reduce){.celebrate-toast,.celebrate-particle,.celebrate-confetti,.celebrate-spark{animation:none!important}.celebrate-toast{display:none;opacity:1;transform:translate(-50%,0);}}
 
   .week-mini-row{ display:flex; align-items:center; gap:10px; padding:9px 4px; border-bottom:1px dashed var(--line); cursor:pointer; }
   .week-mini-row:last-child{ border-bottom:none; }
@@ -326,8 +330,7 @@
       <h2><span class="dot"></span>امروز <span class="sub" id="homeDateLabel">—</span></h2>
       <p class="hint">همه‌چیزی که امروز باید بهش برسی: تارگت‌های ماهانه‌ی فعال، برنامه‌ی تکرارشونده‌ی امروز، و کارهای اضافه.</p>
     </div>
-
-    <div class="card home">
+<div class="card home">
       <h2><span class="dot"></span>تارگت‌های ماهانه‌ی فعال</h2>
       <div id="homeTargets"></div>
     </div>
@@ -652,16 +655,107 @@
     return recurringTasks.filter(t => t.days.includes(d.getDay()));
   }
 
-  function taskActionsHtml(type, id, index, length, allowEdit=false){
-    const atFirst = index === 0;
-    const atLast = index === length - 1;
-    return `<div class="task-actions">
-      ${allowEdit ? `<button class="task-action edit" data-action="edit" data-type="${type}" data-id="${id}" title="ویرایش نام">ویرایش</button>` : ""}
-      <button class="task-action" data-action="first" data-type="${type}" data-id="${id}" title="بردن به اول" ${atFirst?"disabled":""}>اول</button>
-      <button class="task-action" data-action="up" data-type="${type}" data-id="${id}" title="یک جایگاه بالاتر" ${atFirst?"disabled":""}>↑</button>
-      <button class="task-action" data-action="down" data-type="${type}" data-id="${id}" title="یک جایگاه پایین‌تر" ${atLast?"disabled":""}>↓</button>
-      <button class="task-action" data-action="last" data-type="${type}" data-id="${id}" title="بردن به آخر" ${atLast?"disabled":""}>آخر</button>
-    </div>`;
+  function taskActionsHtml(type, id, index, total, allowEdit=false, allowDrag=false){
+    const drag = allowDrag ? `<span class="drag-handle" title="برای جابه‌جایی بکش" aria-label="جابجایی">⠿</span>` : "";
+    return `<div class="task-actions">${allowEdit ? `<button class="task-action edit" data-action="edit" data-type="${type}" data-id="${id}" title="ویرایش نام">ویرایش</button>` : ""}${drag}</div>`;
+  }
+
+  function animateFlip(container, selector, mutate){
+    const els=[...container.querySelectorAll(selector)];
+    const first=new Map(els.map(el=>[el,el.getBoundingClientRect()]));
+    mutate();
+    [...container.querySelectorAll(selector)].forEach(el=>{
+      const a=first.get(el); if(!a) return;
+      const b=el.getBoundingClientRect();
+      const dx=a.left-b.left, dy=a.top-b.top;
+      if(Math.abs(dx)<1 && Math.abs(dy)<1) return;
+      el.style.transition='none'; el.style.transform=`translate(${dx}px,${dy}px)`;
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{
+        el.style.transition='transform .24s cubic-bezier(.2,.8,.2,1)';
+        el.style.transform='';
+        const clean=()=>{el.style.transition='';el.removeEventListener('transitionend',clean)};
+        el.addEventListener('transitionend',clean);
+      }));
+    });
+  }
+
+  function enableDragSort(container, selector, getId, onReorder){
+    // Rebuilt sortable engine: a fixed visual clone follows the pointer while
+    // the real row stays in normal document flow. This avoids layout gaps.
+    let active=null, ghost=null, pointerId=null, changed=false;
+    let offsetY=0, latestEvent=null, raf=0;
+    const items=()=>[...container.querySelectorAll(selector)];
+
+    function clear(){
+      if(raf){ cancelAnimationFrame(raf); raf=0; }
+      if(ghost) ghost.remove();
+      ghost=null;
+      if(active){ active.classList.remove('dragging'); active.style.opacity=''; active.style.visibility=''; }
+      active=null; pointerId=null; latestEvent=null;
+      document.body.classList.remove('sorting-active');
+    }
+
+    async function finish(){
+      if(!active) return;
+      const order=items().map(getId);
+      const didChange=changed;
+      clear(); changed=false;
+      if(didChange) await onReorder(order);
+    }
+
+    function update(){
+      raf=0;
+      if(!active || !ghost || !latestEvent) return;
+      const y=latestEvent.clientY;
+      ghost.style.top=(y-offsetY)+'px';
+
+      const siblings=items().filter(el=>el!==active);
+      let beforeEl=null;
+      for(const el of siblings){
+        const r=el.getBoundingClientRect();
+        if(y < r.top + r.height/2){ beforeEl=el; break; }
+      }
+      const oldIndex=items().indexOf(active);
+      const next=beforeEl ? beforeEl : null;
+      if(next!==active && active.nextElementSibling!==next){
+        // FLIP only for non-active rows. The dragged row itself is represented
+        // by the fixed clone, so its layout height never changes.
+        animateFlip(container, selector, ()=>container.insertBefore(active,next));
+        if(items().indexOf(active)!==oldIndex) changed=true;
+      }
+    }
+
+    function move(e){
+      if(!active || e.pointerId!==pointerId) return;
+      e.preventDefault(); latestEvent=e;
+      if(!raf) raf=requestAnimationFrame(update);
+    }
+
+    container.addEventListener('pointerdown',e=>{
+      const handle=e.target.closest('.drag-handle');
+      if(!handle || !container.contains(handle) || e.button>0) return;
+      const item=handle.closest(selector);
+      if(!item) return;
+      e.preventDefault();
+      active=item; pointerId=e.pointerId; changed=false;
+      const r=item.getBoundingClientRect();
+      offsetY=Math.max(0,Math.min(r.height,e.clientY-r.top));
+      ghost=item.cloneNode(true);
+      ghost.classList.add('drag-ghost');
+      ghost.style.width=r.width+'px';
+      ghost.style.height=r.height+'px';
+      ghost.style.left=r.left+'px';
+      ghost.style.top=r.top+'px';
+      document.body.appendChild(ghost);
+      item.classList.add('dragging');
+      item.style.opacity='0';
+      document.body.classList.add('sorting-active');
+      try{ handle.setPointerCapture(pointerId); }catch(_){ }
+      window.addEventListener('pointermove',move,{passive:false});
+      const done=ev=>{ if(ev.pointerId!==pointerId) return; window.removeEventListener('pointermove',move); finish(); };
+      window.addEventListener('pointerup',done,{once:true});
+      window.addEventListener('pointercancel',done,{once:true});
+    });
   }
 
   async function editRecurring(id){
@@ -725,13 +819,6 @@
     const layer = document.createElement("div");
     layer.className = "celebrate-layer";
     document.body.appendChild(layer);
-    const messages = allDone
-      ? ["همه کارهای امروز انجام شد! 🎉", "امروز رو ترکوندی! 🔥", "عالی بود؛ همه‌چی تموم شد! ✨"]
-      : ["آفرین! یکی دیگه هم تموم شد ✓", "دمت گرم! یه قدم دیگه جلو رفتی 💪", "عالیه! ادامه بده ✨", "انجام شد! همین‌طور پیش برو 🚀"];
-    const toast = document.createElement("div");
-    toast.className="celebrate-toast";
-    toast.textContent = messages[Math.floor(Math.random()*messages.length)] + (label ? `  ${label}` : "");
-    layer.appendChild(toast);
 
     const mode = allDone ? "fireworks" : ["confetti","sparkles","stars","burst"][Math.floor(Math.random()*4)];
     if(mode === "confetti" || mode === "fireworks") {
@@ -783,8 +870,9 @@
         const done = !!dayRecord.tasks[t.id];
         const row = document.createElement("div");
         row.className = "task-row";
+        row.dataset.taskId = t.id;
         const globalIndex = recurringTasks.findIndex(x=>x.id===t.id);
-        row.innerHTML = `<div class="checkbox ${done?"checked":""}" data-id="${t.id}">${checkSvg}</div><div class="txt ${done?"done":""}">${escapeHtml(t.title)}</div>${taskActionsHtml("recurring", t.id, globalIndex, recurringTasks.length)}`;
+        row.innerHTML = `<div class="checkbox ${done?"checked":""}" data-id="${t.id}">${checkSvg}</div><div class="txt ${done?"done":""}">${escapeHtml(t.title)}</div>${taskActionsHtml("recurring", t.id, globalIndex, recurringTasks.length, false, true)}`;
         row.querySelector(".checkbox").addEventListener("click", async ()=>{
           const wasDone = !!dayRecord.tasks[t.id];
           dayRecord.tasks[t.id] = !wasDone;
@@ -792,7 +880,6 @@
           await saveDay();
           if(!wasDone) celebrateCompletion(t.title, state.allDone);
         });
-        row.querySelectorAll(".task-action:not(.edit)").forEach(btn=>btn.addEventListener("click", ()=>moveRecurring(t.id, btn.dataset.action)));
         wrap.appendChild(row);
       });
     }
@@ -805,7 +892,8 @@
       dayRecord.extras.forEach((ex, index)=>{
         const row = document.createElement("div");
         row.className = "task-row";
-        row.innerHTML = `<div class="checkbox ${ex.done?"checked":""}" data-id="${ex.id}">${checkSvg}</div><div class="txt ${ex.done?"done":""}">${escapeHtml(ex.text)}</div>${taskActionsHtml("extra", ex.id, index, dayRecord.extras.length)}<button class="del-btn" data-id="${ex.id}" title="حذف">✕</button>`;
+        row.dataset.taskId = ex.id;
+        row.innerHTML = `<div class="checkbox ${ex.done?"checked":""}" data-id="${ex.id}">${checkSvg}</div><div class="txt ${ex.done?"done":""}">${escapeHtml(ex.text)}</div>${taskActionsHtml("extra", ex.id, index, dayRecord.extras.length, false, true)}<button class="del-btn" data-id="${ex.id}" title="حذف">✕</button>`;
         row.querySelector(".checkbox").addEventListener("click", async ()=>{
           const wasDone = !!ex.done;
           ex.done = !wasDone;
@@ -813,11 +901,24 @@
           await saveDay();
           if(!wasDone) celebrateCompletion(ex.text, state.allDone);
         });
-        row.querySelectorAll(".task-action:not(.edit)").forEach(btn=>btn.addEventListener("click", ()=>moveExtra(ex.id, btn.dataset.action, dayRecord, saveDay)));
         row.querySelector(".del-btn").addEventListener("click", async ()=>{ dayRecord.extras = dayRecord.extras.filter(e=>e.id!==ex.id); await saveDay(); });
         exWrap.appendChild(row);
       });
     }
+
+    // Drag & drop فقط در تب روزانه؛ نمای کلی عمداً قابلیت جابه‌جایی ندارد.
+    enableDragSort(wrap, ".task-row", el=>el.dataset.taskId, async order=>{
+      const visible=new Set(order);
+      const ordered=order.map(id=>recurringTasks.find(x=>x.id===id)).filter(Boolean);
+      let i=0;
+      recurringTasks=recurringTasks.map(t=>visible.has(t.id)?ordered[i++]:t);
+      await storeSet("recurring-tasks", recurringTasks);
+      renderDay(); renderHome(); renderWeekList();
+    });
+    enableDragSort(exWrap, ".task-row", el=>el.dataset.taskId, async order=>{
+      dayRecord.extras.sort((a,b)=>order.indexOf(a.id)-order.indexOf(b.id));
+      await saveDay();
+    });
 
     const total = list.length + dayRecord.extras.length;
     const doneCount = list.filter(t=>dayRecord.tasks[t.id]).length + dayRecord.extras.filter(e=>e.done).length;
@@ -886,18 +987,23 @@
     recurringTasks.forEach((t, index)=>{
       const item = document.createElement("div");
       item.className = "rec-item";
+      item.dataset.taskId = t.id;
       const badges = t.days.slice()
         .sort((a,b)=> WEEKDAYS.findIndex(w=>w.idx===a) - WEEKDAYS.findIndex(w=>w.idx===b))
         .map(d=>`<span class="badge">${WD_SHORT[d]}</span>`).join("");
-      item.innerHTML = `<div class="rec-item-top"><div class="txt">${escapeHtml(t.title)}</div>${taskActionsHtml("recurring", t.id, index, recurringTasks.length, true)}<button class="del-btn" data-id="${t.id}" title="حذف">✕</button></div><div class="badges">${badges}</div>`;
+      item.innerHTML = `<div class="rec-item-top"><div class="txt">${escapeHtml(t.title)}</div>${taskActionsHtml("recurring", t.id, index, recurringTasks.length, true, true)}<button class="del-btn" data-id="${t.id}" title="حذف">✕</button></div><div class="badges">${badges}</div>`;
       item.querySelector('[data-action="edit"]').addEventListener("click", ()=>editRecurring(t.id));
-      item.querySelectorAll(".task-action:not(.edit)").forEach(btn=>btn.addEventListener("click", ()=>moveRecurring(t.id, btn.dataset.action)));
+
       item.querySelector(".del-btn").addEventListener("click", async ()=>{
         recurringTasks = recurringTasks.filter(x=>x.id!==t.id);
         await storeSet("recurring-tasks", recurringTasks);
         renderWeekList(); renderDay(); renderHome();
       });
       wrap.appendChild(item);
+    });
+    enableDragSort(wrap, ".rec-item", el=>el.dataset.taskId, async order=>{
+      recurringTasks.sort((a,b)=>order.indexOf(a.id)-order.indexOf(b.id));
+      await storeSet("recurring-tasks", recurringTasks); renderWeekList(); renderDay(); renderHome();
     });
   }
 
@@ -1019,6 +1125,8 @@
     const rec = await getHomeRecord();
     const todayObj = new Date();
     const list = todaysRecurringFor(todayObj);
+    const totalToday = list.length + rec.extras.length;
+    const doneToday = list.filter(t=>rec.tasks[t.id]).length + rec.extras.filter(e=>e.done).length;
 
     const recWrap = document.getElementById("homeRecurring");
     recWrap.innerHTML = "";
@@ -1039,7 +1147,6 @@
           await saveHomeRecord(r);
           if(!wasDone) celebrateCompletion(t.title, state.allDone);
         });
-        row.querySelectorAll(".task-action:not(.edit)").forEach(btn=>btn.addEventListener("click", ()=>moveRecurring(t.id, btn.dataset.action)));
         recWrap.appendChild(row);
       });
     }
